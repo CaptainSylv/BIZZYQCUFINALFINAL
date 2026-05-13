@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Manage Orders | BizzyQCU";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/ManageStyle.css">
+}
+
+<div class="split-wrapper">
+    <aside class="sidebar-fixed" id="detailsPanel">
+        <div class="sidebar-placeholder">
+            <p class="sidebar-placeholder-text">Select an order card<br>to view details</p>
+        </div>
+    </aside>
+
+    <div class="scrollable-area">
+        <div class="content-container">
+            <h2 class="page-title">Active Orders</h2>
+            <div id="ordersContainer">
+                <div class="loading-orders">Loading orders...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mobile-modal" onclick="if(event.target == this) this.style.display='none'">
+    <div class="modal-body" id="modal-content"></div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/ManageOrders.js"></script>
+}

@@ -1,0 +1,52 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Add Product - BizzyQCU";
+}
+
+<link rel="stylesheet" href="~/Content/EnterpriseDashboard.css">
+
+<div class="add-product-page">
+    <div class="add-product-shell">
+        <div class="add-product-grid">
+            <div class="add-product-left">
+                <label for="productImage" class="add-product-image-box" title="Upload Product Image">
+                    <input id="productImage" type="file" accept="image/*" class="add-product-image-input" />
+                    <span class="add-product-image-icon">Click to add Image</span>
+                    <img id="imagePreview" class="product-image-preview" style="display: none;" />
+                </label>
+
+                <div class="add-product-actions">
+                    <button type="button" class="add-product-btn add-product-btn-save" id="saveProductBtn">Save Product</button>
+                    <button type="button" class="add-product-btn add-product-btn-cancel" onclick="history.back()">Cancel</button>
+                </div>
+            </div>
+
+            <div class="add-product-form">
+                <input type="text" id="productName" placeholder="Product Name" aria-label="Name" required />
+                <input type="number" step="0.01" min="0" id="productPrice" placeholder="Price" aria-label="Price" required />
+
+                <div class="category-select" id="categorySelect">
+                    <input type="hidden" id="productCategory" value="" />
+                    <button type="button" class="category-select-trigger" id="categorySelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+                        <span id="categorySelectLabel">Select Category</span>
+                        <span class="category-select-caret">&#9662;</span>
+                    </button>
+                    <div class="category-select-menu" id="categorySelectMenu" role="listbox">
+                        <button type="button" class="category-option is-placeholder" data-value="">Select Category</button>
+                        <button type="button" class="category-option" data-value="Food">Food</button>
+                        <button type="button" class="category-option" data-value="Merchandise">Merchandise</button>
+                        <button type="button" class="category-option" data-value="Printing">Printing</button>
+                        <button type="button" class="category-option" data-value="Services">Services</button>
+                    </div>
+                </div>
+
+                <input type="number" id="preparationTime" min="1" max="60" step="1" placeholder="Preparation Time (minutes, max 60)" aria-label="Preparation Time" required />
+                <textarea id="productDescription" placeholder="Description" aria-label="Description"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/AddProduct.js?v=20260513-uifix2"></script>
+}

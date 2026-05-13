@@ -1,0 +1,203 @@
+﻿@model BizzyQCU.Models.OrderTrackingViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Tracking - Order #QCU-" + Model.OrderId;
+
+    string emoji;
+    string statusLabel;
+
+    if (Model.Status == "completed")
+    {
+        emoji = "✅";
+        statusLabel = "Order Completed";
+    }
+    else if (Model.Status == "cancelled")
+    {
+        emoji = "❌";
+        statusLabel = "Order Cancelled";
+    }
+    else
+    {
+        emoji = "🍳";
+        statusLabel = Model.Status == "out_for_delivery" ? "Out for Delivery" : "Preparing Order";
+    }
+
+    string currentStatus = (Model.Status ?? "").ToLowerInvariant();
+    bool canCancelOrder = currentStatus == "pending" || currentStatus == "preparing" || currentStatus == "out_for_delivery";
+
+    string progressClass;
+    if (Model.Status == "completed")
+    {
+        progressClass = "progress-fill complete";
+    }
+    else if (Model.Status == "cancelled")
+    {
+        progressClass = "progress-fill cancelled";
+    }
+    else
+    {
+        progressClass = "progress-fill";
+    }
+}
+
+<link rel="stylesheet" href="~/Content/trackingstyle.css" />
+@Html.AntiForgeryToken()
+
+<div class="split-wrapper">
+    <div class="sidebar-fixed">
+        <div class="sidebar-icon-container">
+            <div class="status-emoji-box">@emoji</div>
+            <div class="status-text-group">
+                <p class="status-title">@statusLabel</p>
+                <span class="status-subtitle">
+                    @if (!string.IsNullOrEmpty(Model.EstimatedTime) && Model.EstimatedTime != "TBD")
+                    {
+                        @:ETA: @Model.EstimatedTime
+                    }
+                    else
+                    {
+                        @:ETA: TBD
+                    }
+                </span>
+            </div>
+        </div>
+        <div class="custom-progress-bar">
+            <div class="@progressClass"></div>
+        </div>
+        <h1 class="order-number">Order #QCU-@Model.OrderId</h1>
+        <p class="live-indicator">LIVE STATUS</p>
+        @if (canCancelOrder)
+        {
+            <button type="button" id="cancelOrderBtn" class="cancel-order-btn">Cancel Order</button>
+        }
+    </div>
+
+    <div class="scrollable-area">
+        <a href="@Url.Action("History", "Tracking")" class="glass-card"
+           style="text-align:center; text-decoration:none; font-weight:800; color:#111FA2; display:block;">
+            🕒 Check Previous Orders
+        </a>
+
+        @* Location card — only show if there is a location *@
+        @if (!string.IsNullOrEmpty(Model.CustomerLocation))
+        {
+            <div class="glass-card">
+                <p class="status-subtitle" style="color:#5478FF; font-weight:800; margin-bottom:5px;">📍 YOUR LOCATION</p>
+                <h2 style="color:#111FA2; font-weight:800; margin:0;">@Model.CustomerLocation</h2>
+                @if (!string.IsNullOrEmpty(Model.OrderNote))
+                {
+                    <div style="background:#FFF9DB; padding:10px; border-radius:10px; margin-top:10px; border-left:4px solid #FFDE42; font-size:13px;">
+                        "@Model.OrderNote"
+                    </div>
+                }
+            </div>
+        }
+
+        @* Order details card *@
+        <div class="glass-card">
+            <p class="status-subtitle" style="color:#5478FF; font-weight:800; margin-bottom:10px;">
+                ORDER DETAILS — @Model.StoreName
+            </p>
+
+            @if (Model.Items != null && Model.Items.Count > 0)
+            {
+                foreach (var item in Model.Items)
+                {
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#111FA2;">
+                        <span>@item.Quantity x @item.ProductName</span>
+                        <b>&#8369;@((item.Quantity * item.UnitPrice).ToString("0.##"))</b>
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="color:#999;">No items found.</p>
+            }
+
+            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+            @if (Model.DeliveryFee > 0)
+            {
+                <div style="display:flex; justify-content:space-between; color:#111FA2; margin-bottom:5px;">
+                    <span>Delivery Fee</span>
+                    <span>&#8369;@Model.DeliveryFee.ToString("0.##")</span>
+                </div>
+            }
+
+            <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:900; color:#111FA2;">
+                <span>Total</span>
+                <span>&#8369;@Model.TotalAmount.ToString("0.##")</span>
+            </div>
+        </div>
+
+        @* Delivery method badge *@
+        <div class="glass-card" style="color:#111FA2;">
+            <p class="status-subtitle" style="color:#5478FF; font-weight:800; margin-bottom:5px;">🚚 DELIVERY METHOD</p>
+            <div class="delivery-method-row">
+                <p style="font-weight:800; margin:0;">
+                    @if (Model.DeliveryOption == "pickup")
+                    {
+                        @:Store Pickup
+                    }
+                    else if (Model.DeliveryOption == "room_to_room")
+                    {
+                        @:Room to Room
+                    }
+                    else
+                    {
+                        @:Campus Delivery
+                    }
+                </p>
+                <button type="button" class="msg-courier"
+                        onclick="location.href='@Url.Action("Chatroom", "Chatroom", new { orderId = Model.OrderId })'">
+                    💬 Message Courier
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var cancelBtn = document.getElementById('cancelOrderBtn');
+            if (!cancelBtn) return;
+
+            cancelBtn.addEventListener('click', function () {
+                if (!confirm('Cancel this order? The enterprise will see it as cancelled right away.')) {
+                    return;
+                }
+
+                cancelBtn.disabled = true;
+                cancelBtn.textContent = 'Cancelling...';
+
+                fetch('@Url.Action("CancelOrder", "Tracking")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    },
+                    body: '__RequestVerificationToken=' + encodeURIComponent(document.querySelector('input[name="__RequestVerificationToken"]').value) +
+                        '&orderId=' + encodeURIComponent('@Model.OrderId')
+                })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        if (data && data.success) {
+                            window.location.reload();
+                            return;
+                        }
+
+                        alert((data && data.message) || 'Unable to cancel order.');
+                        cancelBtn.disabled = false;
+                        cancelBtn.textContent = 'Cancel Order';
+                    })
+                    .catch(function () {
+                        alert('Unable to cancel order.');
+                        cancelBtn.disabled = false;
+                        cancelBtn.textContent = 'Cancel Order';
+                    });
+            });
+        })();
+    </script>
+}

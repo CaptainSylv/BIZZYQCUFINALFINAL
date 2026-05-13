@@ -1,0 +1,566 @@
+﻿@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Orders | Campus Eats</title>
+    <style>
+        :root {
+            --primary-yellow: #ffde42;
+            --accent-sky: #53cbf3;
+            --accent-royal: #5478ff;
+            --deep-navy: #111fa2;
+            --bg-soft: #f4f7fe;
+            --white: #ffffff;
+            --text-muted: #64748b;
+            --success-green: #2d8a3e;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", -apple-system, sans-serif;
+            background: linear-gradient(to bottom, var(--primary-yellow), var(--deep-navy)) no-repeat fixed;
+            color: var(--deep-navy);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        .glass-header {
+            background: var(--white);
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 4px solid var(--primary-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .main-logo {
+            height: 100px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: #c2d1ff;
+            border: none;
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            color: var(--accent-royal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* --- LAYOUT LOGIC --- */
+        .history-layout {
+            display: block; /* Mobile default */
+            min-height: calc(100vh - 70px);
+        }
+
+        .desktop-details-sidebar {
+            display: none;
+        }
+        /* Hidden on mobile */
+
+        /* --- PC GRID INSTRUCTIONS --- */
+        @@media (min-width: 1024px) {
+            body {
+                overflow: hidden;
+                height: 100vh;
+            }
+
+            .history-layout {
+                display: grid !important;
+                grid-template-columns: 450px 1fr;
+                height: calc(100vh - 70px);
+            }
+
+            .desktop-details-sidebar {
+                display: block !important;
+                background: var(--white);
+                border-right: 2px solid #e2e8f0;
+                padding: 40px;
+                overflow-y: auto;
+            }
+
+            .history-main-content {
+                overflow-y: auto;
+                padding: 40px 10% !important;
+                background: transparent;
+            }
+
+                .history-main-content::-webkit-scrollbar {
+                    width: 8px;
+                }
+
+                .history-main-content::-webkit-scrollbar-thumb {
+                    background: rgba(255,255,255,0.2);
+                    border-radius: 10px;
+                }
+        }
+
+        /* --- CARDS & UI --- */
+        .history-main-content {
+            padding: 20px;
+        }
+
+        .history-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 8px solid var(--accent-royal);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+            .history-card:hover {
+                transform: translateY(-3px);
+            }
+
+        .status-pill {
+            padding: 6px 15px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+
+            .status-pill.pending {
+                background: #ffec99;
+                color: #856404;
+            }
+
+            .status-pill.preparing {
+                background: #a5d8ff;
+                color: #004085;
+            }
+
+            .status-pill.delivery {
+                background: #d8f5a2;
+                color: #3b5a07;
+            }
+
+            .status-pill.completed {
+                background: #b6ffc0;
+                color: var(--success-green);
+            }
+
+        .action-btn {
+            background: var(--deep-navy);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* --- DETAIL COMPONENTS --- */
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: var(--deep-navy);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .order-note-box {
+            background: #fff9db;
+            border-left: 4px solid var(--primary-yellow);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .courier-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--bg-soft);
+            padding: 15px;
+            border-radius: 18px;
+            margin-top: 20px;
+        }
+
+        .chat-icon-btn {
+            background: var(--white);
+            border: 2px solid #eef2ff;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* --- MOBILE MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+            .modal-overlay.active {
+                display: flex;
+            }
+
+        .modal-module {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 25px 25px 0 0;
+            padding: 25px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @@keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        /* --- ACTION MENU --- */
+        .status-menu {
+            background: white;
+            border: 1px solid #eef2ff;
+            border-radius: 12px;
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 100;
+            width: max-content;
+        }
+
+        .menu-opt {
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        /* Hamburger Menu Styling */
+        .menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 5px;
+        }
+
+        .hamburger-line {
+            width: 28px;
+            height: 3px;
+            background-color: var(--deep-navy);
+            border-radius: 2px;
+        }
+        /* --- GLOBAL NAVBAR STYLES --- */
+        .navbar-global {
+            position: sticky;
+            top: 0;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            background: #ffffff;
+            gap: 20px;
+            z-index: 1500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+            .navbar-global .logo img {
+                max-height: 150px;
+                width: 200px;
+                display: block;
+            }
+
+            .navbar-global .divider {
+                width: 3px;
+                height: 40px;
+                background: #f4c430;
+                margin: 0 30px;
+                flex-shrink: 0;
+            }
+
+            .navbar-global .nav-links {
+                display: flex;
+                gap: 40px;
+                align-items: center;
+            }
+
+                .navbar-global .nav-links a {
+                    text-decoration: none;
+                    color: #111fa2;
+                    font-weight: 600;
+                    font-size: 16px;
+                    white-space: nowrap;
+                }
+
+            .navbar-global .right-icons {
+                margin-left: auto;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .navbar-global .cart-icon img {
+                height: 35px;
+            }
+
+            .navbar-global .account-icon img {
+                height: 40px;
+                border-radius: 50%;
+            }
+
+        /* --- RESPONSIVE LOGIC --- */
+
+        /* Mobile View */
+        @@media (max-width: 1023px) {
+            .navbar-global {
+                display: none !important;
+            }
+
+            .glass-header {
+                display: flex !important;
+            }
+        }
+
+        /* PC View */
+        @@media (min-width: 1024px) {
+            .glass-header {
+                display: none !important;
+            }
+
+            .navbar-global {
+                display: flex !important;
+                grid-area: nav;
+            }
+
+            body {
+                display: grid !important;
+                grid-template-areas:
+                    "nav nav"
+                    "content content"; /* Change this based on your preference below */
+                grid-template-rows: 90px 1fr;
+                height: 100vh;
+                overflow: hidden;
+            }
+            /* Update your existing .history-layout to fit the grid */
+            .history-layout {
+                grid-area: content;
+                display: grid !important;
+                grid-template-columns: 450px 1fr;
+                /* Subtract Navbar height (90px) from the viewport */
+                height: calc(100vh - 90px) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar-global">
+        <div class="logo">
+            <a href="/"><img src="@Url.Content("~/Content/Images/Logo.png")" alt="logo"></a>
+        </div>
+        <div class="divider"></div>
+        <div class="nav-links">
+            <a href="#" onclick="window.location.href = '@Url.Action("Homepage", "Home")'">HOME</a>
+            <a href="#" onclick="window.location.href = '@Url.Action("ProductList", "ProductList")'">PRODUCTS</a>
+            <a href="#" onclick="window.location.href = '@Url.Action("EnterpriseList", "EnterpriseList")'">ENTERPRISES</a>
+            <a href="#" onclick="window.location.href = '@Url.Action("About", "Home")'">ABOUT US</a>
+        </div>
+        <div class="right-icons">
+            <div class="cart-icon">
+                <a href="#"><img src="@Url.Content("~/Content/Images/cart-icon.png")" alt="Cart" onclick="window.location.href = '@Url.Action("tracking", "Home")'"></a>
+            </div>
+            <div class="account-icon">
+                <img src="@Url.Content("~/Content/Images/account-icon.png")" alt="Account" onclick="window.location.href = '@Url.Action("UserProfile", "Profile")'">
+            </div>
+        </div>
+    </div>
+    <header class="glass-header">
+        <button class="back-btn" onclick="window.history.back()">
+            <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 3;"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+        <img src="~/Content/images/bizzyqcu logo.png" alt="Logo" class="main-logo" />
+        <div style="width:40px"></div>
+        <div class="header-right">
+            <button class="menu-btn">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </button>
+        </div>
+    </header>
+
+    <div class="history-layout">
+        <aside class="desktop-details-sidebar" id="desktop-details">
+            <div style="text-align:center; padding-top:100px; color:var(--text-muted);">
+                <h3>Select an order</h3>
+                <p>Click on any order card to view full details and tracker.</p>
+            </div>
+        </aside>
+
+        <main class="history-main-content">
+            <h2 style="margin-bottom: 20px; font-weight: 900; color: white;">Active Orders</h2>
+
+            <div class="history-card" onclick="showOrderDetails('QCU-9821', 'Jed Tangonan', '₱85.00', '1x Special Siomai Rice, 1x Iced Coffee', 'Room IL603', 'Please make it spicy', 'Juvi Cayli', '10:55 AM')">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h4 style="margin:0; font-size:18px; font-weight:800; color:var(--deep-navy);">Jed Tangonan</h4>
+                        <p style="margin:2px 0 0 0; font-size:12px; color:var(--text-muted);">Today • 10:55 AM</p>
+                    </div>
+                    <span id="pill-QCU-9821" class="status-pill pending">Pending</span>
+                </div>
+                <p style="font-size:13px; color:var(--accent-royal); margin:15px 0;">1x Special Siomai Rice, 1x Iced Coffee</p>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:22px; font-weight:900;">₱85.00</span>
+                    <div id="action-QCU-9821" style="position:relative;">
+                        <button class="action-btn" onclick="handleOrderAction(event, 'QCU-9821')">Confirm Order</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-card" onclick="showOrderDetails('QCU-9821', 'Clarence', '₱105.00', '2x Sisig w/ Rice, 1x Mountain Dew', 'Room IK502', 'Bring change for 100 pesos.', 'Juvi Cayli', '2:30 PM')">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h4 style="margin:0; font-size:18px; font-weight:800; color:var(--deep-navy);">Clarence</h4>
+                        <p style="margin:2px 0 0 0; font-size:12px; color:var(--text-muted);">Today • 2:30 PM</p>
+                    </div>
+                    <span id="pill-QCU-1015" class="status-pill pending">Pending</span>
+                </div>
+                <p style="font-size:13px; color:var(--accent-royal); margin:15px 0;">2x Sisig w/ Rice, 1x Mountain Dew</p>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:22px; font-weight:900;">₱105.00</span>
+                    <div id="action-QCU-9821" style="position:relative;">
+                        <button class="action-btn" onclick="handleOrderAction(event, 'QCU-9821')">Confirm Order</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="mobile-modal" class="modal-overlay" onclick="if(event.target == this) this.classList.remove('active')">
+        <div class="modal-module">
+            <div id="modal-content-area"></div>
+            <button onclick="document.getElementById('mobile-modal').classList.remove('active')" style="width:100%; margin-top:20px; padding:15px; border:none; background:var(--bg-soft); border-radius:15px; font-weight:800; color:var(--text-muted); cursor:pointer;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function showOrderDetails(id, store, total, items, loc, note, courier, time) {
+            const html = `
+                                <div style="animation: fadeIn 0.3s ease-out;">
+                                    <h2 style="font-weight:900; color:var(--deep-navy); margin:0;">Order #${id}</h2>
+                                    <p style="color:var(--accent-royal); font-weight:800; margin-bottom:25px; font-size:12px; text-transform:uppercase;">${store} • ${time}</p>
+
+                                    <div class="detail-row"><span class="detail-label">Items</span><span class="detail-value">${items}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Deliver to</span><span class="detail-value">${loc}</span></div>
+
+                                    ${note ? `<div class="order-note-box"><strong>Note:</strong> "${note}"</div>` : ''}
+
+                                    <div style="border-top:2px dashed #e2e8f0; margin:20px 0; padding-top:10px;">
+                                        <div class="detail-row" style="font-size:18px;"><span class="detail-label" style="color:var(--deep-navy)">Total Paid</span><span class="detail-value" style="color:var(--deep-navy)">${total}</span></div>
+                                    </div>
+
+                                    <h3 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-top:30px;">Courier Details</h3>
+                                    <div class="courier-card">
+                                        <div style="width:45px; height:45px; background:var(--deep-navy); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800;">${courier.charAt(0)}</div>
+                                        <div style="flex:1">
+                                            <div style="font-weight:800; color:var(--deep-navy);">${courier}</div>
+                                            <div style="font-size:11px; color:var(--text-muted);">Student Rider</div>
+                                        </div>
+                                        <button class="chat-icon-btn" onclick="alert('Opening chat...')">💬</button>
+                                    </div>
+                                </div>
+                            `;
+
+            if (window.innerWidth >= 1024) {
+                document.getElementById('desktop-details').innerHTML = html;
+            } else {
+                document.getElementById('modal-content-area').innerHTML = html;
+                document.getElementById('mobile-modal').classList.add('active');
+            }
+        }
+
+        function handleOrderAction(event, id) {
+            event.stopPropagation();
+            const container = document.getElementById(`action-${id}`);
+            const pill = document.getElementById(`pill-${id}`);
+            pill.innerText = 'Preparing';
+            pill.className = 'status-pill preparing';
+            container.innerHTML = `<button class="action-btn" style="background:var(--accent-royal)" onclick="toggleStatusMenu(event, '${id}')">Update Status</button>`;
+        }
+
+        function toggleStatusMenu(event, id) {
+            event.stopPropagation();
+            const container = document.getElementById(`action-${id}`);
+            if (document.getElementById(`menu-${id}`)) return;
+            container.insertAdjacentHTML('afterbegin', `
+                                <div class="status-menu" id="menu-${id}">
+                                    <div class="menu-opt" onclick="finalizeStatus(event, '${id}', 'delivery')">🚚 Out for Delivery</div>
+                                    <div class="menu-opt" style="border:none; color:var(--success-green)" onclick="finalizeStatus(event, '${id}', 'completed')">✅ Completed</div>
+                                </div>
+                            `);
+            document.addEventListener('click', () => { if (document.getElementById(`menu-${id}`)) document.getElementById(`menu-${id}`).remove(); }, { once: true });
+        }
+
+        function finalizeStatus(event, id, state) {
+            event.stopPropagation();
+            const pill = document.getElementById(`pill-${id}`);
+            const container = document.getElementById(`action-${id}`);
+            if (state === 'delivery') {
+                pill.innerText = 'In Transit'; pill.className = 'status-pill delivery';
+                container.innerHTML = `<span style="font-size:12px; color:var(--text-muted); font-weight:800">Tracking...</span>`;
+            } else {
+                pill.innerText = 'Completed'; pill.className = 'status-pill completed';
+                container.innerHTML = `<button class="action-btn" onclick="location.reload()">Reorder</button>`;
+            }
+        }
+    </script>
+</body>
+</html>

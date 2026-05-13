@@ -1,0 +1,93 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Enterprise Dashboard - BizzyQCU";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/EnterpriseDashboard.css">
+}
+
+<div class="dashboard-container">
+
+    <div class="enterprise-header">
+        <div class="profile-icon">
+            @if (!string.IsNullOrWhiteSpace(ViewBag.StoreLogo as string))
+            {
+                <img src="@Url.Content(ViewBag.StoreLogo)" alt="@ViewBag.EnterpriseName" />
+            }
+        </div>
+        <h1>@ViewBag.EnterpriseName</h1>
+    </div>
+
+    <!-- Rest of your HTML remains the same -->
+    <div class="top-row">
+        <div class="stats-column">
+            <div class="stats-card sales-card">
+                <div class="stats-card-text">
+                    <h3>Total Sales</h3>
+                    <p class="sub">Today</p>
+                    <h2 class="stat-total-sales">₱ 0</h2>
+                </div>
+                <img src="~/Images/sales-icon.png" alt="Sales" class="stats-icon">
+            </div>
+            <div class="stats-card orders-card">
+                <div class="stats-card-text">
+                    <h3>Orders</h3>
+                    <p class="sub">Pending</p>
+                    <h2 class="stat-orders-pending">0</h2>
+                </div>
+                <img src="~/Images/orders-icon.png" alt="Orders" class="stats-icon">
+            </div>
+            <div class="stats-card deliveries-card">
+                <div class="stats-card-text">
+                    <h3>Deliveries</h3>
+                    <p class="sub">Active</p>
+                    <h2 class="stat-deliveries-active">0</h2>
+                </div>
+                <img src="~/Images/deliveries-icon.png" alt="Deliveries" class="stats-icon">
+            </div>
+        </div>
+
+        <div class="chart-column">
+            <div class="sales-box">
+                <div class="sales-header">
+                    <h3>Sales Overview</h3>
+                    <div class="dropdown-wrapper">
+                        <select id="salesPeriodSelect">
+                            <option value="daily">Daily</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <canvas id="salesChart" height="250"></canvas>
+                <div class="weekly" id="weeklyTotal">This Week: ₱ 0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM ROW: NEW ORDERS (image with left margin, text close, arrow right) + ACTION BUTTONS -->
+    <div class="bottom-row">
+        <div class="new-orders-wide" id="newOrdersBtn">
+            <div class="new-orders-left">
+                <img src="~/Images/new-orders-icon.png" alt="New Orders" class="new-orders-icon">
+                <span class="new-orders-text"><span id="newOrdersCount">0</span> New Orders</span>
+            </div>
+            <span class="arrow-right">></span>
+        </div>
+        <div class="actions-column">
+            <div class="actions">
+                <button id="addProductBtn" onclick="window.location.href = '@Url.Action("Addproduct", "AddProduct")'"><img src="~/Images/add-icon.png" alt=""> Add Product</button>
+                <button id="manageOrdersBtn" onclick="window.location.href = '@Url.Action("ManageOrders", "ManageOrders")'"><img src="~/Images/manage-icon.png" alt=""> Manage Orders</button>
+                <button id="enterpriseChatBtn" onclick="window.location.href = '@Url.Action("EnterpriseChatroom", "EnterpriseDashboard")'"><img src="~/Images/manage-icon.png" alt=""> Chatroom</button>
+                <button id="editStoreBtn" onclick="window.location.href = '@Url.Action("EditStore", "EditStore")'"><img src="~/Images/edit-icon.png" alt=""> Edit Store</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-bottom-spacer" aria-hidden="true"></div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/Scripts/EnterpriseDashboard.js"></script>
+}

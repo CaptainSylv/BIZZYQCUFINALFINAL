@@ -1,0 +1,241 @@
+﻿@model IEnumerable<BizzyQCU.Controllers.OrderHistoryItem>
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewData["Title"] = "Order History";
+
+}
+
+
+
+<link rel="stylesheet" href="~/Content/trackingstyle.css" />
+
+
+
+<div class="split-wrapper">
+
+    <div class="sidebar-fixed">
+
+        <div class="sidebar-icon-container">
+
+            <div class="status-emoji-box">🕒</div>
+
+            <div class="status-text-group">
+
+                <p class="status-title">Order History</p>
+
+                <span class="status-subtitle">Your past orders</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="scrollable-area">
+
+
+
+        @if (Model == null || !Model.Any())
+
+        {
+
+            <div class="glass-card" style="text-align:center; color:#999;">
+
+                <p style="font-size:2rem;">🛒</p>
+
+                <p>You have no past orders yet.</p>
+
+                <a href="@Url.Action("ProductList", "ProductList")"
+                   style="color:#111FA2; font-weight:800;">Browse products →</a>
+
+            </div>
+
+        }
+
+        else
+
+        {
+
+            foreach (var order in Model)
+
+            {
+
+                string statusEmoji;
+
+                string statusColor;
+
+                string currentStatus = (order.Status ?? "").ToLower();
+
+
+
+                if (currentStatus == "completed")
+
+                {
+
+                    statusEmoji = "✅";
+
+                    statusColor = "#2e7d32";
+
+                }
+
+                else if (currentStatus == "cancelled")
+
+                {
+
+                    statusEmoji = "❌";
+
+                    statusColor = "#c62828";
+
+                }
+
+                else
+
+                {
+
+                    statusEmoji = "🍳";
+
+                    statusColor = "#111FA2";
+
+                }
+
+
+
+                string deliveryLabel;
+
+                if (order.DeliveryOption == "room_to_room")
+
+                {
+
+                    deliveryLabel = "Room to Room";
+
+                }
+
+                else if (order.DeliveryOption == "campus_delivery")
+
+                {
+
+                    deliveryLabel = "Campus Delivery";
+
+                }
+
+                else
+
+                {
+
+                    deliveryLabel = "Pickup";
+
+                }
+
+
+
+                <div class="glass-card">
+
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+
+                        <div>
+
+                            <p class="status-subtitle" style="color:#5478FF; font-weight:800; margin-bottom:4px;">
+
+                                @order.StoreName
+
+                            </p>
+
+                            <h3 style="color:#111FA2; font-weight:900; margin:0;">
+
+                                Order #QCU-@order.OrderId
+
+                            </h3>
+
+                            <p style="color:#666; font-size:13px; margin:4px 0 0;">
+
+                                @order.OrderDate.ToString("MMM dd, yyyy · hh:mm tt")
+
+                            </p>
+
+                        </div>
+
+                        <div style="text-align:right;">
+
+                            <span style="font-size:1.4rem;">@statusEmoji</span><br />
+
+                            <span style="color:@statusColor; font-weight:700; font-size:13px; text-transform:uppercase;">
+
+                                @order.Status
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
+
+
+
+                    <p style="color:#444; font-size:13px; margin:0 0 8px;">
+
+                        @order.ItemsSummary
+
+                    </p>
+
+
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+
+                        <span style="color:#666; font-size:13px;">🚚 @deliveryLabel</span>
+
+                        <span style="font-weight:900; color:#111FA2; font-size:18px;">
+
+                            &#8369;@order.TotalAmount.ToString("0.##")
+
+                        </span>
+
+                    </div>
+
+
+
+                    <div style="margin-top:12px;">
+
+                        @if (currentStatus == "pending" || currentStatus == "preparing" || currentStatus == "out_for_delivery" || currentStatus == "ready")
+
+                        {
+
+                            <a href="@Url.Action("Tracking", "Tracking", new { orderId = order.OrderId })"
+                               style="display:inline-block; padding:8px 20px; background:#111FA2; color:white; border-radius:10px; font-weight:700; text-decoration:none; font-size:13px;">
+
+                                Track Order →
+
+                            </a>
+
+                        }
+
+                        else if (currentStatus == "completed" || currentStatus == "cancelled")
+                        {
+                            <div style="margin-top:12px;">
+                                <a href="@Url.Action("Reorder", "Checkout", new { orderId = order.OrderId })"
+                                   class="btn btn-primary w-100 mt-2">
+                                    Order Again
+                                </a>
+                            </div>
+                        }
+
+                     
+
+                    </div>
+
+                </div>
+
+            }
+
+        }
+
+    </div>
+
+</div>

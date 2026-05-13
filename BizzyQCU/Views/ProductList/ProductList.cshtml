@@ -1,0 +1,160 @@
+﻿@model IEnumerable<BizzyQCU.Controllers.ProductListItem>
+@using System.Linq
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Product List";
+    ViewBag.BodyClass = "product-page";
+    var products = (Model ?? Enumerable.Empty<BizzyQCU.Controllers.ProductListItem>()).ToList();
+}
+
+<div class="product-page-container">
+    <div class="floating-header">
+        <h2>CAMPUS <span class="header-highlight">MARKETPLACE</span></h2>
+        <p>Shop from student enterprises - food, merch, printing, &amp; more.</p>
+    </div>
+
+    <div class="search-filtering">
+        <div class="search-row">
+            <div class="searchbox-section">
+                @Html.TextBox("searchString", null, new
+                {
+                    @class = "search-input",
+                    placeholder = "Search for products",
+                    id = "productSearch",
+                    autocomplete = "off"
+                })
+            </div>
+            <button class="filter-icon-btn" id="filterToggleBtn" aria-label="Toggle filters">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                    <line x1="4" y1="6" x2="20" y2="6" />
+                    <circle cx="14" cy="6" r="2.5" fill="white" />
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                    <circle cx="8" cy="12" r="2.5" fill="white" />
+                    <line x1="4" y1="18" x2="20" y2="18" />
+                    <circle cx="16" cy="18" r="2.5" fill="white" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="filter-section" id="filterSection">
+            @Html.DropDownList("category", new List<SelectListItem>
+            {
+                new SelectListItem { Text = "All Categories", Value = "" },
+                new SelectListItem { Text = "Food",           Value = "food" },
+                new SelectListItem { Text = "Merchandise",    Value = "merch" },
+                new SelectListItem { Text = "Printing",       Value = "printing" },
+                new SelectListItem { Text = "Services",       Value = "services" }
+            }, new { @class = "filter-dropdown", id = "categoryFilter" })
+
+            @Html.DropDownList("popularity", new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Sort by: Recommended", Value = "" },
+                new SelectListItem { Text = "Most Popular",          Value = "high" },
+                new SelectListItem { Text = "Least Popular",         Value = "low" }
+            }, new { @class = "filter-dropdown", id = "popularityFilter" })
+
+            @Html.DropDownList("priceRange", new List<SelectListItem>
+            {
+                new SelectListItem { Text = "All Prices",       Value = "" },
+                new SelectListItem { Text = "Low (₱1 - ₱100)", Value = "lowprice" },
+                new SelectListItem { Text = "High (₱100+)",     Value = "highprice" }
+            }, new { @class = "filter-dropdown", id = "priceFilter" })
+        </div>
+    </div>
+
+    <div class="product-list-wrapper">
+        <div class="product-grid-container" id="productGrid">
+
+            @if (!products.Any())
+            {
+                <div class="market-empty-state">No current products</div>
+            }
+
+            @foreach (var product in products)
+            {
+                string categoryLower = (product.CategoryName != null) ? product.CategoryName.ToLower() : "";
+                string cat;
+                if (categoryLower == "food & beverage" || categoryLower == "food")
+                {
+                    cat = "food";
+                }
+                else if (categoryLower == "retail" || categoryLower == "merchandise")
+                {
+                    cat = "merch";
+                }
+                else if (categoryLower == "printing")
+                {
+                    cat = "printing";
+                }
+                else if (categoryLower == "services")
+                {
+                    cat = "services";
+                }
+                else
+                {
+                    cat = "other";
+                }
+
+                string popularity = product.OrderCount >= 10 ? "high" : "low";
+                string priceRange = product.Price >= 100 ? "highprice" : "lowprice";
+
+                string productUrl = Url.Action("ProductChild", "ProductChild", new { id = product.ProductId });
+
+                string imageBase64 = product.ProductImage != null ? Convert.ToBase64String(product.ProductImage) : "";
+
+                <div class="product-card"
+                     data-category="@cat"
+                     data-popularity="@popularity"
+                     data-price="@priceRange"
+                     data-product-url="@productUrl"
+                     data-product-id="@product.ProductId"
+                     data-product-name="@product.ProductName"
+                     data-price-value="@product.Price"
+                     data-enterprise-id="@product.EnterpriseId"
+                     data-enterprise-name="@product.StoreName"
+                     data-image-base64="@imageBase64">
+
+                    <div class="product-img-placeholder">
+                        @if (product.ProductImage != null)
+                        {
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(product.ProductImage)"
+                                 alt="@product.ProductName" />
+                        }
+                        else
+                        {
+                            <img src="~/Content/Images/placeholder.png" alt="@product.ProductName" />
+                        }
+                    </div>
+
+                    <div class="product-card-info">
+                        <span class="product-store">@product.StoreName</span>
+                        <span class="product-name">@product.ProductName</span>
+                        <span class="product-desc">@product.Description</span>
+                        <div class="product-footer">
+                            <span class="product-price">&#8369;@product.Price.ToString("0.##")</span>
+                            <button class="add-btn" type="button">+</button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <div class="pagination-container" id="paginationContainer">
+                <button class="pagination-btn" id="prevPageBtn">◀ Previous</button>
+                <span class="page-info" id="pageInfo">Page 1</span>
+                <button class="pagination-btn" id="nextPageBtn">Next Page ▶</button>
+            </div>
+        </div>
+
+        @if (products.Any())
+        {
+            <p class="no-results" id="noResults" style="display:none;">No products found.</p>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/ProductPageLogic.js")?v=20260513-prev-next"></script>
+}

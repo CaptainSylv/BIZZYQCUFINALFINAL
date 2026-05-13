@@ -1,0 +1,241 @@
+CREATE DATABASE BizzyQCU;
+USE BizzyQCU;
+
+CREATE TABLE users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    email VARCHAR(50) UNIQUE NOT NULL,
+    role ENUM('admin','enterprise','student') NOT NULL DEFAULT 'student',
+    is_approved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    firstname VARCHAR(100),
+    lastname VARCHAR(100),
+    student_number VARCHAR(50) UNIQUE NOT NULL,
+    section VARCHAR(20),
+    birthdate DATE,
+    address TEXT,
+    contact_number VARCHAR(20),
+    profile_image LONGBLOB,
+    qcu_id LONGBLOB,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE enterprises(
+    enterprise_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    store_name VARCHAR(255) NOT NULL,
+    store_description TEXT,
+    store_logo VARCHAR(500),
+    contact_number VARCHAR(20),
+    rating_avg DECIMAL(3,2) DEFAULT 0.00,
+    enterprise_type VARCHAR(100),
+    gcash_number VARCHAR(15),
+    uploaded_document LONGBLOB,
+    status ENUM('pending','approved','rejected','suspended') DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE enterprise_managers(
+    manager_id INT PRIMARY KEY AUTO_INCREMENT,
+    enterprise_id INT NOT NULL,
+    manager_name VARCHAR(255),
+    manager_student_id VARCHAR(50),
+    manager_section VARCHAR(20) NULL,
+    manager_contact VARCHAR(20),
+    manager_email VARCHAR(255),
+    FOREIGN KEY (enterprise_id) REFERENCES enterprises (enterprise_id) ON DELETE CASCADE
+);
+
+CREATE TABLE product_categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(100) UNIQUE NOT NULL,
+    category_icon VARCHAR(255)
+);
+
+
+CREATE TABLE products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    enterprise_id INT NOT NULL,
+    category_id INT,
+    product_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    product_image LONGBLOB,
+    preparation_time INT DEFAULT 0,
+    status ENUM('active','inactive') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (enterprise_id) REFERENCES enterprises(enterprise_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES product_categories(category_id)
+);
+
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    enterprise_id INT NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('pending','preparing','out_for_delivery','completed','cancelled') DEFAULT 'pending',
+    payment_method VARCHAR(50),
+    delivery_option VARCHAR(50) DEFAULT 'pickup',
+    order_note TEXT,
+    delivery_fee DECIMAL(10,2) DEFAULT 0.00,
+    estimated_time TIME,
+    customer_location VARCHAR(255),
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (enterprise_id) REFERENCES enterprises(enterprise_id)
+);
+
+
+CREATE TABLE order_items (
+    orderitem_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+
+CREATE TABLE chat_messages (
+    message_id INT PRIMARY KEY AUTO_INCREMENT,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    order_id INT NOT NULL,
+    message_text TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    is_courier_message BOOLEAN DEFAULT FALSE,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE delivery_options (
+    delivery_id INT PRIMARY KEY AUTO_INCREMENT,
+    enterprise_id INT NOT NULL,
+    delivery_type ENUM('pickup','room_to_room','campus_delivery') DEFAULT 'pickup',
+    delivery_fee DECIMAL(10,2) DEFAULT 0.00,
+    notes TEXT DEFAULT 'Thank you',
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (enterprise_id) REFERENCES enterprises(enterprise_id) ON DELETE CASCADE
+);
+
+
+
+
+CREATE TABLE transaction_history (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    enterprise_id INT NOT NULL,
+    order_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    transaction_type ENUM('sale','refund') DEFAULT 'sale',
+    FOREIGN KEY (enterprise_id) REFERENCES enterprises(enterprise_id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+
+
+CREATE TABLE approval_requests (
+    request_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    role ENUM('student', 'enterprise') NOT NULL,
+    firstname VARCHAR(100),
+    lastname VARCHAR(100),
+    student_number VARCHAR(50),
+    section VARCHAR(50),
+    contact_number VARCHAR(20),
+    store_name VARCHAR(255),
+    store_description TEXT,
+    gcash_number VARCHAR(15),
+    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    qcu_id LONGBLOB NULL
+); 
+
+CREATE TABLE feedbacks (
+   feedback_id INT PRIMARY KEY AUTO_INCREMENT,
+   user_id INT NOT NULL,
+   user_type ENUM('entrepreneur', 'customer') NOT NULL,
+   email VARCHAR(255) NOT NULL,
+   contact_number VARCHAR(20),
+   category VARCHAR(100),
+   message TEXT NOT NULL,
+   rating INT CHECK (rating BETWEEN 1 AND 5),
+   status ENUM('pending', 'read', 'replied') DEFAULT 'pending',
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+); 
+
+
+
+
+
+
+CREATE TABLE enterprise_analytics (
+    analytics_id INT PRIMARY KEY AUTO_INCREMENT,
+    enterprise_id INT NOT NULL,
+    date DATE NOT NULL,
+    daily_sales DECIMAL(10,2) DEFAULT 0.00,
+    orders_count INT DEFAULT 0,
+    avg_rating DECIMAL(3,2) DEFAULT 0.00,
+    UNIQUE KEY (enterprise_id, date),
+    FOREIGN KEY (enterprise_id) REFERENCES enterprises (enterprise_id)
+);
+
+CREATE VIEW weekly_analytics AS
+SELECT 
+    enterprise_id,
+    YEAR(date) as year,
+    WEEK(date) as week,
+    DATE_ADD(date, INTERVAL(1-DAYOFWEEK(date)) DAY) as week_start,
+    SUM(daily_sales) as total_sales,
+    SUM(orders_count) as total_orders,
+    AVG(avg_rating) as avg_rating
+FROM enterprise_analytics
+GROUP BY enterprise_id, YEAR(date), WEEK(date);
+
+CREATE VIEW monthly_analytics AS
+SELECT 
+    enterprise_id,
+    YEAR(date) as year,
+    MONTH(date) as month,
+    DATE_FORMAT(date, '%M') as month_name,
+    SUM(daily_sales) as total_sales,
+    SUM(orders_count) as total_orders,
+    AVG(avg_rating) as avg_rating
+FROM enterprise_analytics
+GROUP BY enterprise_id, YEAR(date), MONTH(date);
+
+CREATE VIEW yearly_analytics AS
+SELECT 
+    enterprise_id,
+    YEAR(date) as year,
+    SUM(daily_sales) as total_sales,
+    SUM(orders_count) as total_orders,
+    AVG(avg_rating) as avg_rating
+FROM enterprise_analytics
+GROUP BY enterprise_id, YEAR(date); 
+
+
+
+INSERT INTO users (username, password, email, role, is_approved, created_at) 
+VALUES ('admin', 'admin123', 'admin@gmail.com', 'admin', 1, CURRENT_TIMESTAMP);                                                                     
+
+
+
+
+

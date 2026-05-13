@@ -1,0 +1,123 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="~/Content/Login.css" />
+
+<div class="auth-bg">
+    <div class="login-card">
+        <h2>LOGIN</h2>
+        <div id="messageBox" class="message"></div>
+        <form id="loginForm" onsubmit="return loginUser(event)">
+            <input type="text" id="username" placeholder="Username" required>
+            <div class="password-wrapper">
+                <input type="password"
+                       id="password"
+                       placeholder="Password"
+                       oninput="handlePasswordInput()">
+
+                <span id="togglePassword"
+                      class="show-password"
+                      onclick="togglePassword()"
+                      style="display:none;">
+                    Show
+                </span>
+            </div>
+            <button type="submit" class="auth-btn login-btn">LOGIN</button>
+        </form>
+        <div class="auth-links">
+            New to BizzyQCU? <a href="@Url.Action("RegisterStudent", "Home")">Sign up</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function togglePassword() {
+
+        var password = document.getElementById("password");
+
+        if (password.type === "password") {
+            password.type = "text";
+        } else {
+            password.type = "password";
+        }
+    }
+
+    function handlePasswordInput() {
+
+        var password =
+            document.getElementById("password").value;
+
+        var toggle =
+            document.getElementById("togglePassword");
+
+        if (password.length > 0) {
+            toggle.style.display = "block";
+        } else {
+            toggle.style.display = "none";
+        }
+    }
+
+    function showMessage(message, type) {
+        var msgBox = document.getElementById('messageBox');
+        msgBox.textContent = message;
+        msgBox.style.backgroundColor = type === 'error' ? '#fee' : '#e8f5e9';
+        msgBox.style.color = type === 'error' ? '#c33' : '#2e7d32';
+        msgBox.style.display = 'block';
+        setTimeout(function () { msgBox.style.display = 'none'; }, 3000);
+    }
+
+    function loginUser(event) {
+    event.preventDefault();
+
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+
+    if (username === '' || password === '') {
+        showMessage('Please enter username and password.', 'error');
+        return false;
+    }
+
+    $.ajax({
+        url: '@Url.Action("Login", "Account")',
+        type: 'POST',
+        data: {
+            username: username,
+            password: password
+        },
+        success: function(response) {
+            if (response.success) {
+                showMessage('Welcome ' + response.displayName + '! Login successful.', 'success');
+
+                sessionStorage.setItem('currentUser', JSON.stringify({
+                    username: response.username,
+                    role: response.role,
+                    displayName: response.displayName
+                }));
+
+              setTimeout(function() {
+    if (response.redirectUrl) {
+        window.location.href = response.redirectUrl;
+    } else if (response.role === 'enterprise') {
+        window.location.href = '@Url.Action("EnterpriseDashboard", "EnterpriseDashboard")';
+    } else {
+        window.location.href = '@Url.Action("ProductList", "ProductList")';
+    }
+}, 1500);
+            } else {
+                showMessage(response.message || 'Invalid username or password!', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log("Error:", error);
+            console.log("Response:", xhr.responseText);
+            showMessage('Server error. Please try again.', 'error');
+        }
+    });
+
+    return false;
+}
+</script>

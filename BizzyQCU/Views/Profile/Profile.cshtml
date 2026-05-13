@@ -1,0 +1,139 @@
+@model BizzyQCU.Controllers.AccountSettingsPageViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="screen screen-profile">
+    <div class="profile-panel">
+
+        @using (Html.BeginForm((string)ViewBag.SettingsAction ?? "Profile", "Home", FormMethod.Post,
+            new { @class = "profile-form", id = "profileForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- ? REQUIRED HIDDEN FIELDS -->
+            @Html.HiddenFor(m => m.Profile.PhotoDataUrl, new { id = "PhotoDataUrl" })
+            @Html.HiddenFor(m => m.Profile.QrDataUrl, new { id = "QrDataUrl" })
+
+            <!-- ? FILE INPUTS -->
+            <input id="photoInput" type="file" accept="image/*" hidden />
+            <input id="qrInput" type="file" accept="image/*" hidden />
+
+            <div class="profile-layout">
+
+                @Html.Partial("UserProfile", Model)
+
+                <div class="profile-separator" aria-hidden="true"></div>
+
+                @Html.Partial("EnterpriseProfile", Model)
+
+            </div>
+        }
+
+        <!-- ? PASSWORD MODAL -->
+        @Html.Partial("ChangePasswordModal", Model)
+
+    </div>
+</section>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // ======================
+            // BUTTONS
+            // ======================
+            var editButton = document.getElementById("editInfoBtn");
+            var changePhotoButton = document.getElementById("changePhotoBtn");
+            var uploadQrButton = document.getElementById("uploadQrBtn");
+
+            var photoInput = document.getElementById("photoInput");
+            var qrInput = document.getElementById("qrInput");
+
+            var preview = document.getElementById("profilePreview");
+            var qrPreview = document.getElementById("qrPreview");
+            var qrPlaceholder = document.getElementById("qrPlaceholder");
+            var photoData = document.getElementById("PhotoDataUrl");
+            var qrData = document.getElementById("QrDataUrl");
+
+            var editableFields = document.querySelectorAll(".editable-field");
+
+            // safety check (prevents crash)
+            if (!editButton || !changePhotoButton || !uploadQrButton) {
+                console.error("Buttons not found. Check _UserProfile.cshtml rendering.");
+                return;
+            }
+
+            var editing = false;
+
+            // ======================
+            // EDIT MODE
+            // ======================
+            function setEditingState(isEditing) {
+                editing = isEditing;
+
+                for (var i = 0; i < editableFields.length; i++) {
+                    editableFields[i].readOnly = !isEditing;
+                    editableFields[i].classList.toggle("is-editable", isEditing);
+                }
+
+                editButton.textContent = isEditing ? "Lock Info" : "Edit Info";
+            }
+
+            editButton.addEventListener("click", function () {
+                setEditingState(!editing);
+            });
+
+            // ======================
+            // PHOTO UPLOAD
+            // ======================
+            changePhotoButton.addEventListener("click", function () {
+                photoInput.value = "";
+                photoInput.click();
+            });
+
+            // ======================
+            // QR UPLOAD
+            // ======================
+            uploadQrButton.addEventListener("click", function () {
+                qrInput.value = "";
+                qrInput.click();
+            });
+
+            function wireUpload(input, callback) {
+                if (!input) return;
+
+                input.addEventListener("change", function (e) {
+                    var file = e.target.files[0];
+                    if (!file) return;
+
+                    var reader = new FileReader();
+                    reader.onload = function (ev) {
+                        callback(ev.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            wireUpload(photoInput, function (dataUrl) {
+                if (preview) preview.src = dataUrl;
+                if (photoData) photoData.value = dataUrl;
+            });
+
+            wireUpload(qrInput, function (dataUrl) {
+                if (qrData) qrData.value = dataUrl;
+                if (qrPreview) {
+                    qrPreview.src = dataUrl;
+                    qrPreview.classList.remove("is-hidden");
+                }
+                if (qrPlaceholder) {
+                    qrPlaceholder.classList.add("is-hidden");
+                }
+            });
+
+        });
+    </script>
+}

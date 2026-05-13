@@ -1,0 +1,613 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model BizzyQCU.Controllers.AccountSettingsPageViewModel
+@{
+    var showProfileSaveActions = ViewBag.ShowProfileSaveActions == null || (bool)ViewBag.ShowProfileSaveActions;
+    var showProfileEditTools = ViewBag.ShowProfileEditTools == true;
+    ViewBag.PageClass = "page-profile";
+}
+<style>
+    .dashboard-container {
+        padding: 30px;
+    }
+
+    .dashboard-card {
+        background: #f5f5f5;
+        border-radius: 20px;
+        padding: 25px 35px;
+        box-shadow: 6px 6px 0 #4b4b6b;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .card-header h2 {
+            color: #2d3cb3;
+            font-weight: 700;
+        }
+
+    .card-divider {
+        height: 2px;
+        background: #aaa;
+        margin: 15px 0 25px;
+    }
+
+    .profile-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 50px;
+    }
+
+    .profile-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .profile-photo img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #ddd;
+        object-fit: cover;
+    }
+
+    .profile-tool-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .primary-action-button {
+        background: #2d3cb3;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 140px;
+    }
+
+        .primary-action-button:hover {
+            background: #1f2aa0;
+        }
+
+        .primary-action-button:disabled {
+            background: #8f95d1;
+            cursor: not-allowed;
+        }
+
+    .secondary-action-button {
+        background: #eceefc;
+        color: #2d3cb3;
+        border: 1px solid #2d3cb3;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 140px;
+    }
+
+    .profile-tool-buttons .logout-form {
+        margin: 0;
+    }
+
+    .profile-tool-buttons .logout-button {
+        background: #f0c330;
+        color: #2b2b2b;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 140px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .profile-tool-buttons .logout-button:hover {
+        background: #dbaf1f;
+    }
+
+    .profile-tool-buttons .logout-button .button-icon {
+        display: inline-flex;
+        width: 16px;
+        height: 16px;
+    }
+
+    .profile-tool-buttons .logout-button .button-icon svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .status-message {
+        min-height: 20px;
+        margin-top: 8px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .status-message.error {
+        color: #c62828;
+    }
+
+    .status-message.success {
+        color: #1b7f3a;
+    }
+
+    .logout-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .logout-confirm-overlay.show {
+        display: flex;
+    }
+
+    .logout-confirm-card {
+        width: min(92vw, 420px);
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .logout-confirm-card h3 {
+        margin: 0 0 8px;
+        color: #1e2f98;
+    }
+
+    .logout-confirm-card p {
+        margin: 0;
+        color: #555;
+    }
+
+    .logout-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .logout-confirm-actions button {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .logout-cancel-btn {
+        background: #eceefc;
+        color: #2d3cb3;
+    }
+
+    .logout-proceed-btn {
+        background: #f0c330;
+        color: #2b2b2b;
+    }
+
+    .edit-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .edit-modal-overlay.show {
+        display: flex;
+    }
+
+    .edit-modal-card {
+        width: min(94vw, 920px);
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px 22px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+        max-height: 90vh;
+        overflow: auto;
+    }
+
+    .edit-modal-title {
+        margin: 0 0 14px;
+        color: #2d3cb3;
+        font-weight: 700;
+        font-size: 22px;
+    }
+
+    .modal-field {
+        margin-bottom: 12px;
+    }
+
+    .modal-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 16px;
+    }
+
+    .modal-field label {
+        display: block;
+        color: #555;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .modal-field input {
+        width: 100%;
+        border: 1px solid #c9d0f4;
+        border-radius: 8px;
+        padding: 9px 11px;
+    }
+
+    .password-input-wrap {
+        position: relative;
+    }
+
+    .password-input-wrap input {
+        padding-right: 70px;
+    }
+
+    .show-password-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        color: #2d3cb3;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 6px;
+        white-space: nowrap;
+    }
+
+    .modal-actions {
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        grid-column: 1 / -1;
+        flex-wrap: nowrap;
+    }
+
+    .modal-actions .secondary-action-button,
+    .modal-actions .primary-action-button {
+        width: auto;
+        min-width: 140px;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+
+    .password-panel {
+        margin-top: 8px;
+        padding: 12px;
+        border: 1px solid #d7ddf8;
+        border-radius: 10px;
+        background: #f8faff;
+        grid-column: 1 / -1;
+    }
+
+    .password-panel.hidden {
+        display: none;
+    }
+
+    .password-panel-title {
+        margin: 0 0 10px;
+        color: #2d3cb3;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .modal-photo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        grid-column: 1 / -1;
+    }
+
+    .modal-photo img {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #ddd;
+    }
+
+    @@media (max-width: 760px) {
+        .modal-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* INPUT STYLE */
+    .info-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        font-weight: bold;
+        color: #000;
+    }
+
+        .info-input[readonly] {
+            pointer-events: none;
+        }
+
+        .info-input:focus {
+            outline: none;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 4px;
+        }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .info-row {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        margin-bottom: 14px;
+    }
+
+        .info-row span {
+            font-weight: 500;
+            color: #555;
+        }
+</style>
+
+
+
+<link rel="stylesheet" href="~/Content/Edit.css" />
+<div class="dashboard-container">
+
+    <div class="dashboard-card profile-card">
+
+        <div class="card-header">
+            <h2>User Profile</h2>
+
+            @if (showProfileEditTools)
+            {
+                <button id="headerEditBtn" class="primary-action-button">Edit Profile</button>
+            }
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="profile-content">
+
+            <!-- LEFT -->
+            <div class="profile-left">
+
+                <div class="profile-photo">
+                    <img id="profileImage" src="@Model.Profile.PhotoDataUrl" />
+                </div>
+
+                <div class="profile-tool-buttons">
+                    <button id="editInfoBtn" class="primary-action-button" type="button">
+                        Edit Profile
+                    </button>
+
+                    <form action="@Url.Action("Logout", "Account")" method="post" class="logout-form">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="logout-button">
+                            <span class="button-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5" />
+                                    <path d="M14 16l4-4-4-4" />
+                                    <path d="M8 12h10" />
+                                </svg>
+                            </span>
+                            Log Out
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div class="profile-info">
+
+                <div class="info-row">
+                    <span>First Name</span>
+                    <input id="firstNameInput" class="info-input" value="@Model.Profile.Firstname" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Last Name</span>
+                    <input id="lastNameInput" class="info-input" value="@Model.Profile.Lastname" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Student Number</span>
+                    <input id="studentNumberInput" class="info-input" value="@Model.Profile.StudentId" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Section</span>
+                    <input id="sectionInput" class="info-input" value="@Model.Profile.Section" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Birthdate</span>
+                    <input id="birthdateInput" class="info-input" value="@Model.Profile.Birthdate" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Address</span>
+                    <input id="addressInput" class="info-input" value="@Model.Profile.Address" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Contact Number</span>
+                    <input id="contactInput" class="info-input" value="@Model.Profile.ManagerContactNumber" readonly />
+                </div>
+
+                <div class="info-row">
+                    <span>Email</span>
+                    <input id="emailInput" class="info-input" value="@Model.Profile.Email" readonly />
+                </div>
+
+                <div id="profileStatus" class="status-message"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div id="editProfileModal" class="edit-modal-overlay" aria-hidden="true">
+    <div class="edit-modal-card" role="dialog" aria-modal="true" aria-labelledby="editProfileModalTitle">
+        <h3 id="editProfileModalTitle" class="edit-modal-title">Edit Profile</h3>
+
+        <div class="modal-form-grid">
+            <div class="modal-photo">
+                <img id="modalProfileImage" src="@Model.Profile.PhotoDataUrl" alt="Profile Photo Preview" />
+                <button id="changePhotoBtn" class="secondary-action-button" type="button">Change Photo</button>
+                <input type="file" id="photoInput" accept="image/*" style="display:none;" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalFirstNameInput">First Name</label>
+                <input id="modalFirstNameInput" type="text" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalLastNameInput">Last Name</label>
+                <input id="modalLastNameInput" type="text" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalStudentNumberInput">Student Number</label>
+                <input id="modalStudentNumberInput" type="text" readonly disabled />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalSectionInput">Section</label>
+                <input id="modalSectionInput" type="text" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalBirthdateInput">Birthdate</label>
+                <input id="modalBirthdateInput" type="date" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalAddressInput">Address</label>
+                <input id="modalAddressInput" type="text" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalContactInput">Contact Number</label>
+                <input id="modalContactInput" type="text" />
+            </div>
+
+            <div class="modal-field">
+                <label for="modalEmailInput">Email</label>
+                <input id="modalEmailInput" type="email" />
+            </div>
+
+            <div id="passwordPanel" class="password-panel hidden">
+                <p class="password-panel-title">Change Password</p>
+                <div class="modal-field">
+                    <label for="modalCurrentPasswordInput">Current Password</label>
+                    <div class="password-input-wrap">
+                        <input id="modalCurrentPasswordInput" type="password" autocomplete="current-password" />
+                        <button type="button" class="show-password-btn" data-target="modalCurrentPasswordInput">Show</button>
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label for="modalNewPasswordInput">New Password</label>
+                    <div class="password-input-wrap">
+                        <input id="modalNewPasswordInput" type="password" autocomplete="new-password" />
+                        <button type="button" class="show-password-btn" data-target="modalNewPasswordInput">Show</button>
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label for="modalConfirmPasswordInput">Confirm Password</label>
+                    <div class="password-input-wrap">
+                        <input id="modalConfirmPasswordInput" type="password" autocomplete="new-password" />
+                        <button type="button" class="show-password-btn" data-target="modalConfirmPasswordInput">Show</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="togglePasswordBtn" class="secondary-action-button" type="button">Change Password</button>
+                <button id="closeModalBtn" class="secondary-action-button" type="button">Cancel</button>
+                <button id="saveModalBtn" class="primary-action-button" type="button">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="logoutConfirmModal" class="logout-confirm-overlay" aria-hidden="true">
+    <div class="logout-confirm-card" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle">
+        <h3 id="logoutConfirmTitle">Log Out</h3>
+        <p>Are you sure you want to log out?</p>
+        <div class="logout-confirm-actions">
+            <button id="logoutCancelBtn" type="button" class="logout-cancel-btn">Cancel</button>
+            <button id="logoutConfirmBtn" type="button" class="logout-proceed-btn">Log Out</button>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/UserProfile.js"></script>
+<script>
+    (function () {
+        var logoutForm = document.querySelector(".logout-form");
+        var logoutModal = document.getElementById("logoutConfirmModal");
+        var logoutCancelBtn = document.getElementById("logoutCancelBtn");
+        var logoutConfirmBtn = document.getElementById("logoutConfirmBtn");
+        var allowSubmit = false;
+
+        if (!logoutForm) return;
+
+        logoutForm.addEventListener("submit", function (event) {
+            if (allowSubmit) return;
+            event.preventDefault();
+            logoutModal.classList.add("show");
+            logoutModal.setAttribute("aria-hidden", "false");
+        });
+
+        logoutCancelBtn.addEventListener("click", function () {
+            logoutModal.classList.remove("show");
+            logoutModal.setAttribute("aria-hidden", "true");
+        });
+
+        logoutConfirmBtn.addEventListener("click", function () {
+            allowSubmit = true;
+            logoutForm.submit();
+        });
+
+        logoutModal.addEventListener("click", function (event) {
+            if (event.target === logoutModal) {
+                logoutModal.classList.remove("show");
+                logoutModal.setAttribute("aria-hidden", "true");
+            }
+        });
+    })();
+</script>

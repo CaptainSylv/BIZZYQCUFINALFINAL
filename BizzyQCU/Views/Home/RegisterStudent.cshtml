@@ -1,0 +1,258 @@
+﻿@{
+    ViewBag.Title = "Student Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Content/Login.css" />
+<div class="auth-bg">
+    <div class="register-card">
+        <h2>STUDENT REGISTER</h2>
+        <div id="messageBox" class="message"></div>
+        <form id="registerForm" onsubmit="return registerStudent(event)">
+            <input type="text" id="firstName" placeholder="First Name" required>
+            <input type="text" id="lastName" placeholder="Last Name" required>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email Address" required>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Password" oninput="handlePasswordInput()" onkeyup="handlePasswordInput()" required>
+
+                <span class="show-password"
+                      id="togglePassword"
+                      onclick="togglePassword('password','togglePassword')"
+                      style="display:none;">
+                    Show
+                </span>
+            </div>
+
+            <div class="password-wrapper">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" oninput="handleConfirmPasswordInput()" onkeyup="handleConfirmPasswordInput()" required>
+
+                <span class="show-password"
+                      id="toggleConfirmPassword"
+                      onclick="togglePassword('confirmPassword','toggleConfirmPassword')"
+                      style="display:none;">
+                    Show
+                </span>
+            </div>
+            <input type="date" id="birthdate">
+
+            <input type="text" id="contact" placeholder="Contact Number"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   maxlength="11"
+                   title="Numbers only (0-9)">
+
+            <input type="text" id="section" placeholder="Section (e.g., BSIT-3A)">
+
+            <input type="text" id="studentId" placeholder="Student ID No. (e.g., 24-1574)"
+                   maxlength="7"
+                   title="Format: 24-1574 or 23-1587">
+
+            <div class="upload-wrapper">
+                <span class="upload-link" onclick="document.getElementById('qcidFile').click()">📎 Upload QCUID</span>
+                <span id="fileName" class="file-name">No file chosen</span>
+                <input type="file" id="qcidFile" style="display:none" onchange="updateFileName()">
+            </div>
+            <button type="submit" class="auth-btn register-btn">REGISTER</button>
+        </form>
+        <div class="auth-links">
+            Already have an account? <a href="@Url.Action("Login", "Home")">Login</a><br>
+            Want to Sell? <a href="@Url.Action("RegisterEnterprise", "Home")">Sign Up Here</a>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.7.0.min.js"></script>
+<script>
+    function handlePasswordInput() {
+        var password = document.getElementById("password").value;
+        var toggle = document.getElementById("togglePassword");
+
+        if (password.length > 0) {
+            toggle.style.display = "block";
+        } else {
+            toggle.style.display = "none";
+        }
+    }
+
+    function handleConfirmPasswordInput() {
+        var password = document.getElementById("confirmPassword").value;
+        var toggle = document.getElementById("toggleConfirmPassword");
+
+        if (password.length > 0) {
+            toggle.style.display = "block";
+        } else {
+            toggle.style.display = "none";
+        }
+    }
+
+    function togglePassword(inputId, toggleId) {
+
+        var input = document.getElementById(inputId);
+        var toggle = document.getElementById(toggleId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            toggle.textContent = "Hide";
+        } else {
+            input.type = "password";
+            toggle.textContent = "Show";
+        }
+
+    }
+
+    function updateFileName() {
+        var input = document.getElementById('qcidFile');
+        var display = document.getElementById('fileName');
+        display.textContent = input.files.length > 0 ? input.files[0].name : 'No file chosen';
+    }
+
+    function showMessage(msg, type) {
+        var box = document.getElementById('messageBox');
+        box.textContent = msg;
+        box.style.backgroundColor = type === 'error' ? '#fee' : '#e8f5e9';
+        box.style.color = type === 'error' ? '#c33' : '#2e7d32';
+        box.style.display = 'block';
+        setTimeout(function() { box.style.display = 'none'; }, 5000);
+    }
+
+    function validateStudentId(id) {
+        var pattern = /^[0-9]{2}-[0-9]{4}$/;
+        return pattern.test(id);
+    }
+
+    function validateContactNumber(contact) {
+        var pattern = /^[0-9]{11}$/;
+        return pattern.test(contact);
+    }
+
+    function restrictStudentId(input) {
+        input.value = input.value.replace(/[^0-9-]/g, '');
+        var val = input.value.replace(/-/g, '');
+        if (val.length >= 2) {
+            input.value = val.substring(0, 2) + (val.length > 2 ? '-' + val.substring(2, 6) : '');
+        }
+        if (input.value.length > 7) {
+            input.value = input.value.substring(0, 7);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var studentIdInput = document.getElementById('studentId');
+        if (studentIdInput) {
+            studentIdInput.addEventListener('input', function() { restrictStudentId(this); });
+        }
+    });
+
+    function registerStudent(e) {
+    e.preventDefault();
+
+    var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password.length < 8) {
+        showMessage('Password must be at least 8 characters long.', 'error');
+        return false;
+    }
+
+    if (confirmPassword.length < 8) {
+        showMessage('Confirm Password must be at least 8 characters long.', 'error');
+        return false;
+    }
+
+    if (password !== confirmPassword) {
+        showMessage('Passwords do not match!', 'error');
+        return false;
+    }
+
+    var formData = {
+        Firstname: document.getElementById('firstName').value,
+        Lastname: document.getElementById('lastName').value,
+        Username: document.getElementById('username').value,
+        Email: document.getElementById('email').value,
+        Password: password,
+        Birthdate: document.getElementById('birthdate').value,
+        ContactNumber: document.getElementById('contact').value,
+        Section: document.getElementById('section').value,
+        StudentNumber: document.getElementById('studentId').value
+    };
+
+    if (!formData.Firstname ||
+        !formData.Lastname ||
+        !formData.Username ||
+        !formData.Email ||
+        !formData.Password) {
+        showMessage('Please fill in all required fields!', 'error');
+        return false;
+    }
+
+    if (formData.StudentNumber && !validateStudentId(formData.StudentNumber)) {
+        showMessage('Student ID must be in format: 24-1574 or 23-1587', 'error');
+        return false;
+    }
+
+    if (formData.ContactNumber && !validateContactNumber(formData.ContactNumber)) {
+        showMessage('Contact Number must be 11 digits (e.g., 09123456789)', 'error');
+        return false;
+        }
+
+        var uploadInput = document.getElementById('qcidFile');
+        if (!uploadInput || !uploadInput.files || uploadInput.files.length === 0) {
+            showMessage('Please upload your QCU ID!', 'error');
+            return false;
+        }
+
+    var uploadInput = document.getElementById('qcidFile');
+
+    var payload = new FormData();
+
+    payload.append('Firstname', formData.Firstname);
+    payload.append('Lastname', formData.Lastname);
+    payload.append('Username', formData.Username);
+    payload.append('Email', formData.Email);
+    payload.append('Password', formData.Password);
+    payload.append('Birthdate', formData.Birthdate || '');
+    payload.append('ContactNumber', formData.ContactNumber || '');
+    payload.append('Section', formData.Section || '');
+    payload.append('StudentNumber', formData.StudentNumber || '');
+
+    if (uploadInput && uploadInput.files && uploadInput.files.length > 0) {
+        payload.append('qcidFile', uploadInput.files[0]);
+    }
+
+    $.ajax({
+        url: '@Url.Action("RegisterStudent", "Account")',
+        type: 'POST',
+        data: payload,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.success) {
+                showMessage(response.message, 'success');
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Login", "Home")';
+                }, 2000);
+            } else {
+                showMessage(response.message, 'error');
+            }
+        },
+        error: function (xhr) {
+            var serverMessage = 'An error occurred. Please try again.';
+            if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                serverMessage = xhr.responseJSON.message;
+            } else if (xhr && xhr.responseText) {
+                try {
+                    var parsed = JSON.parse(xhr.responseText);
+                    if (parsed && parsed.message) {
+                        serverMessage = parsed.message;
+                    }
+                } catch (e) {
+                    serverMessage = 'Request failed (' + xhr.status + ').';
+                }
+            }
+            showMessage(serverMessage, 'error');
+        }
+    });
+
+    return false;
+}
+</script>

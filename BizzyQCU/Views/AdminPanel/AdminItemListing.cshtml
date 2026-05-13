@@ -1,0 +1,153 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "AdminUserListing – BizzyQCU";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet" href="~/Content/Fonts/Fonts.css" />
+    <link rel="stylesheet" href="~/Content/AdminItemListing.css" />
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="@Url.Action("AdminLandingEntrep", "AdminPanel")" class="back-btn">&#8249;</a>
+
+            <div class="nav-logo">
+                <div class="logo-icon"></div>
+            </div>
+        </div>
+
+        <div class="search-wrap">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search products..." />
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="detail-layout">
+
+            <div class="profile-card">
+
+                <div class="profile-avatar" id="profileAvatar">
+                    <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#b0b8d4" stroke-width="1.2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+
+                <div class="profile-name" id="profileName">Loading...</div>
+
+                <div class="profile-meta">
+                    <span class="profile-id" id="profileId">-</span>
+                    <button class="delete-btn" id="deleteBtn">Delete Account</button>
+                </div>
+
+                <div class="profile-stars" id="profileStars">
+                    <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                </div>
+
+                <div class="profile-info">
+                    <p><span class="info-label">Email:</span> <span class="info-value" id="profileEmail">-</span></p>
+                    <p><span class="info-label">Status:</span> <span class="info-value" id="profileStatus">-</span></p>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="action-btn" id="viewReportsBtn">View Reports</button>
+                </div>
+
+            </div>
+
+            <div class="right-panel">
+
+                <div class="product-search-wrap">
+                    <div class="product-search-box">
+                        <input type="text" placeholder="Search products..." id="productSearch" />
+                        <button class="product-search-btn">🔍</button>
+                    </div>
+                    <div class="status-filter-wrap">
+                        <label for="statusFilter" class="status-filter-label">Status</label>
+                        <select id="statusFilter" class="status-filter-select">
+                            <option value="all">All</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="products-grid" id="productsGrid">
+                    <div class="loading-state">Loading products...</div>
+                </div>
+
+                <div class="pagination-row">
+                    <button type="button" class="page-btn" id="prevPageBtn">◀ Previous</button>
+                    <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                    <button type="button" class="page-btn" id="nextPageBtn">Next ▶</button>
+                </div>
+
+                <div class="bottom-actions">
+                    <button class="approve-btn" id="approveItemBtn">Approve Selected</button>
+                    <button class="remove-btn" id="removeItemBtn">Reject Selected</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="deleteModal">
+        <div class="modal">
+            <div class="modal-title">Delete Account</div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="modalEnterpriseName">this enterprise</strong>?
+                This action cannot be undone.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-cancel" id="cancelDelete">Cancel</button>
+                <button class="modal-btn modal-confirm" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" style="display: none;"></div>
+
+    <div class="approve-ui-backdrop" id="approveUiModal" aria-hidden="true">
+        <div class="approve-ui-card" role="dialog" aria-modal="true" aria-labelledby="approveUiTitle">
+            <h3 id="approveUiTitle" class="approve-ui-title">Approve Product</h3>
+            <p id="approveUiMessage" class="approve-ui-message">Are you sure?</p>
+            <div class="approve-ui-actions">
+                <button type="button" class="approve-ui-btn cancel" id="approveUiCancelBtn">Cancel</button>
+                <button type="button" class="approve-ui-btn ok" id="approveUiOkBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-modal-backdrop" id="reportModal" aria-hidden="true">
+        <div class="report-modal-card" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+            <div class="report-modal-head">
+                <h3 id="reportModalTitle">Weekly Sales Report</h3>
+                <button type="button" class="report-close-btn" id="closeReportBtn">×</button>
+            </div>
+            <p class="report-subtitle" id="reportSubtitle">Last 7 days</p>
+            <div class="report-canvas-wrap">
+                <canvas id="weeklySalesChart"></canvas>
+            </div>
+            <div class="report-empty-message" id="reportEmptyMsg" style="display:none;">No weekly sales data found.</div>
+        </div>
+    </div>
+
+    <script>
+        const listingUrl = '@Url.Action("AdminItemListing", "AdminPanel")';
+        const enterpriseId = '@ViewBag.EnterpriseId';
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/Scripts/AdminItemListing.js?v=20260513-pagination-filter"></script>
+
+</body>
+</html>

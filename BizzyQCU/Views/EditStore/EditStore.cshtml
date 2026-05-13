@@ -1,0 +1,139 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit Store";
+    ViewBag.BodyClass = "product-page";
+    var adProduct = ViewBag.AdProduct as BizzyQCU.Models.Landingpage.Product;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/EnterpriseDashboard.css">
+}
+
+<div class="edit-store-page">
+    <section class="edit-store-header">
+        <div class="profile-icon">
+            @if (!string.IsNullOrWhiteSpace(ViewBag.StoreLogo as string))
+            {
+                <img src="@Url.Content(ViewBag.StoreLogo)" alt="@ViewBag.EnterpriseName" />
+            }
+        </div>
+        <h1 id="enterpriseName">@ViewBag.EnterpriseName</h1>
+    </section>
+
+    <section class="edit-store-content">
+        <div class="edit-store-ad-panel">
+            @if (adProduct != null)
+            {
+                <a href="@Url.Action("EditProduct", "EditProduct", new { id = adProduct.ProductId })" class="edit-store-ad-box edit-store-product-ad">
+                    <div class="edit-store-ad-image">
+                        @if (adProduct.HasImage)
+                        {
+                            <img src="@Url.Action("GetProductImage", "EditStore", new { productId = adProduct.ProductId })"
+                                 alt="@adProduct.ProductName" />
+                        }
+                        else
+                        {
+                            <span class="edit-store-ad-icon"><i class="fa-regular fa-image"></i></span>
+                        }
+                    </div>
+                    <div class="edit-store-ad-copy">
+                        <span class="edit-store-ad-label">Featured Product</span>
+                        <h2>@adProduct.ProductName</h2>
+                        <p>@(string.IsNullOrEmpty(adProduct.Description) ? "No description yet." : adProduct.Description)</p>
+                        <strong>PHP @adProduct.Price.ToString("N2")</strong>
+                    </div>
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("AddProduct", "AddProduct")" class="edit-store-ad-box">
+                    <span class="edit-store-ad-icon"><i class="fa-regular fa-image"></i></span>
+                    <span class="edit-store-ad-text">Ad</span>
+                </a>
+            }
+        </div>
+
+        <div class="edit-store-products">
+            <h2>Products (@ViewBag.TotalProducts total)</h2>
+
+            <div class="product-grid-container edit-store-grid" id="productGrid">
+                @if (ViewBag.Products != null && ViewBag.Products.Count > 0)
+                {
+                    foreach (var product in ViewBag.Products)
+                    {
+                        <div class="product-card" data-product-id="@product.ProductId">
+                            <div class="product-img-placeholder">
+                                @if (product.HasImage)
+                                {
+                                    <img src="@Url.Action("GetProductImage", "EditStore", new { productId = product.ProductId })"
+                                         alt="@product.ProductName"
+                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                         onerror="this.style.display='none'; this.nextSibling.style.display='flex';" />
+                                    <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; background: #e5e7eb;">
+                                        <span style="font-size: 40px;">??</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e5e7eb;">
+                                        <span style="font-size: 40px;">??</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="product-card-info">
+                                <span class="product-store">@ViewBag.EnterpriseName</span>
+                                <span class="product-name">@product.ProductName</span>
+                                <span class="product-desc">@(product.Description.Length > 50 ? product.Description.Substring(0, 47) + "..." : product.Description)</span>
+                                <div class="product-footer">
+                                    <span class="product-price">PHP @product.Price.ToString("N2")</span>
+                                    <div class="product-actions">
+                                        <button class="edit-product-btn" onclick="editProduct(@product.ProductId)">Edit</button>
+                                        <button class="delete-product-btn" onclick="deleteProduct(@product.ProductId)">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-products">
+                        <p>No products yet. Click Add Product to create your first product!</p>
+                        <button class="add-product-btn" onclick="window.location.href='@Url.Action("AddProduct", "AddProduct")'">+ Add Product</button>
+                    </div>
+                }
+            </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="pagination">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <a href="@Url.Action("EditStore", new { page = ViewBag.CurrentPage - 1 })" class="page-btn prev">&laquo; Previous</a>
+                    }
+
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        if (i == ViewBag.CurrentPage)
+                        {
+                            <span class="page-btn current">@i</span>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("EditStore", new { page = i })" class="page-btn">@i</a>
+                        }
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <a href="@Url.Action("EditStore", new { page = ViewBag.CurrentPage + 1 })" class="page-btn next">Next &raquo;</a>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/EditStore.js"></script>
+}

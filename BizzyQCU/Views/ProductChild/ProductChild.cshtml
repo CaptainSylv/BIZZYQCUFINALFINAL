@@ -1,0 +1,102 @@
+﻿@model BizzyQCU.Models.ProductDetailViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.ProductName + " - BizzyQCU";
+
+    string rawLogo = Model.EnterpriseLogo;
+    string logoSrc;
+    if (rawLogo != null && rawLogo.Length > 0)
+    {
+        logoSrc = Url.Content(rawLogo);
+    }
+    else
+    {
+        logoSrc = Url.Content("~/Content/Images/test-img-profile.jpg");
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/Pchild.css">
+}
+
+<div class="checkout-bg">
+
+    @* ── Product Card ── *@
+    <div class="product-card">
+
+        <div class="product-img-wrap">
+            @if (Model.ProductImage != null)
+            {
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ProductImage)"
+                     alt="@Model.ProductName" />
+            }
+            else
+            {
+                <img src="https://placehold.co/320x320?text=Product+Image"
+                     alt="@Model.ProductName" />
+            }
+        </div>
+
+        <div class="product-info">
+
+            <h1 class="product-title">@Model.ProductName</h1>
+            <p class="product-price">&#8369;@Model.Price.ToString("0.##")</p>
+
+            <p class="product-meta">
+                Preparation time: @Model.PreparationTime min/s <br />
+                Delivery: @Model.DeliveryOptions
+            </p>
+
+            @if (Model.Description != null && Model.Description.Length > 0)
+            {
+                <p class="product-desc">@Model.Description</p>
+            }
+
+            <div class="quantity-row">
+                <span class="quantity-label">Quantity</span>
+                <div class="qty-controls">
+                    <button class="qty-btn" id="btnMinus" type="button">&#8722;</button>
+                    <input class="qty-input" id="qtyInput" type="number" value="1" min="1" />
+                    <button class="qty-btn" id="btnPlus" type="button">+</button>
+                </div>
+            </div>
+
+            <input type="hidden" id="productId" value="@Model.ProductId" />
+            <input type="hidden" id="productName" value="@Model.ProductName" />
+            <input type="hidden" id="productPrice" value="@Model.Price" />
+            <input type="hidden" id="enterpriseId" value="@Model.EnterpriseId" />
+
+            @Html.AntiForgeryToken()
+
+            <button class="btn-order" id="btnOrder" type="button">Order Now</button>
+
+        </div>
+    </div>
+
+    @* ── Enterprise Card ── *@
+    <div class="enterprise-card">
+
+        <div class="enterprise-avatar">
+            <img src="@logoSrc" alt="@Model.EnterpriseName"
+                 style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+        </div>
+
+        <div class="enterprise-info">
+            <p class="enterprise-name">@Model.EnterpriseName</p>
+            <button class="btn-view-enterprise"
+                    id="btnViewEnterprise"
+                    type="button"
+                    onclick="window.location.href = '@Url.Action("ViewEnterprise", "Enterprise", new { id = Model.EnterpriseId })'">
+                View Enterprise
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="checkout-toast" id="checkoutToast" role="status" aria-live="polite"></div>
+
+@section Scripts {
+    <script src="@Url.Content("~/Scripts/Pchild.js")?v=20260512-multi-enterprise"></script>
+}

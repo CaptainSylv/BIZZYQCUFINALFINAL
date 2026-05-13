@@ -1,0 +1,129 @@
+﻿@model List<BizzyQCU.Models.Landingpage.PendingOrder>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Enterprise Chatroom";
+    int activeOrderId = ViewBag.ActiveOrderId != null ? (int)ViewBag.ActiveOrderId : 0;
+    bool hasActiveOrder = activeOrderId > 0;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/EnterpriseChatroom.css">
+}
+
+<div class="product-page-container enterprise-chatroom-page-container">
+    <div class="enterprise-chatroom-shell">
+        <aside class="enterprise-chatroom-sidebar">
+            <div class="sidebar-heading">Order Conversations</div>
+            <div class="sidebar-list">
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var order in Model)
+                    {
+                        var itemClass = order.OrderId == activeOrderId ? "sidebar-order-item active" : "sidebar-order-item";
+                        <a class="@itemClass" href="@Url.Action("EnterpriseChatroom", "EnterpriseDashboard", new { orderId = order.OrderId })">
+                            <span class="order-id">Order #QCU-@order.OrderId</span>
+                            <span class="order-customer">@order.CustomerName</span>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="sidebar-empty">No active orders right now.</div>
+                }
+            </div>
+        </aside>
+
+        <section class="chatroom-thread enterprise-chatroom-thread">
+            <div class="chatroom-thread-header">
+                <button type="button" class="chatroom-back-btn" onclick="history.back()">Back</button>
+                <div class="chatroom-thread-title">
+                    @(activeOrderId > 0 ? "Order #QCU-" + activeOrderId : "Select an order")
+                </div>
+                <span class="chatroom-thread-status">@(hasActiveOrder ? "Active" : "No order selected")</span>
+            </div>
+
+            <div class="chatroom-messages" id="chatMessages">
+            </div>
+
+            <form class="chatroom-composer" id="enterpriseChatForm" action="#" method="post">
+                <input type="text" id="msgInput" class="chatroom-input" name="message" placeholder="Type your message..." @(hasActiveOrder ? "" : "disabled") />
+                <button type="submit" id="sendBtn" class="enterprise-btn chatroom-send-btn" @(hasActiveOrder ? "" : "disabled")>Send</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var orderId = @activeOrderId;
+    var lastRendered = '';
+
+    function htmlEncode(value) {
+        return $('<div/>').text(value || '').html();
+    }
+
+    function renderStatus(message) {
+        $('#chatMessages').html('<div class="chat-bubble incoming">' + htmlEncode(message) + '</div>');
+    }
+
+    function fetchChat() {
+        if (!orderId) {
+            renderStatus('Select an order to open the conversation.');
+            return;
+        }
+
+        $.get('/Chatroom/GetMessages', { orderId: orderId }, function (data) {
+            if (!data || data.success === false) {
+                renderStatus((data && data.message) || 'Unable to load messages.');
+                return;
+            }
+
+            var html = '';
+            (data.messages || []).forEach(function (m) {
+                html += '<div class="chat-bubble ' + htmlEncode(m.messageType || 'incoming') + '">';
+                html += '<div>' + htmlEncode(m.text) + '</div>';
+                html += '<small>' + htmlEncode(m.sentAt) + '</small>';
+                html += '</div>';
+            });
+
+            if (!html) {
+                html = '<div class="chat-bubble incoming">No messages yet.</div>';
+            }
+
+            if (html !== lastRendered) {
+                $('#chatMessages').html(html);
+                lastRendered = html;
+                var objDiv = document.getElementById('chatMessages');
+                objDiv.scrollTop = objDiv.scrollHeight;
+            }
+        });
+    }
+
+    function sendMessage() {
+        if (!orderId) return;
+
+        var msg = $('#msgInput').val().trim();
+        if (!msg) return;
+
+        $('#sendBtn').prop('disabled', true);
+        $.post('/Chatroom/SendMessage', { orderId: orderId, message: msg }, function (data) {
+            if (data && data.success) {
+                $('#msgInput').val('');
+                fetchChat();
+            } else {
+                alert((data && data.message) || 'Message not sent.');
+            }
+        }).always(function () {
+            $('#sendBtn').prop('disabled', false);
+        });
+    }
+
+    $('#enterpriseChatForm').on('submit', function (event) {
+        event.preventDefault();
+        sendMessage();
+    });
+
+    setInterval(fetchChat, 3000);
+    fetchChat();
+</script>
+}

@@ -1,0 +1,101 @@
+@model BizzyQCU.Controllers.TransactionsPageViewModel
+@{
+    ViewBag.Title = "Transactions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="/Content/Transactions.css" />
+
+<section class="screen screen-transactions">
+    <div class="transactions-toolbar">
+        <button class="toolbar-back" type="button" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = '@Url.Action("Index", "Profile")'; }" aria-label="Go back">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14.5 6.5 9 12l5.5 5.5"></path>
+            </svg>
+        </button>
+
+        <a class="toolbar-brand" href="@Url.Action("Index", "Profile")" aria-label="BizzyQCU home">
+            <img class="brand-logo-image-compact" src="@Url.Content("~/Content/Images/Logo.png")" alt="BizzyQCU" />
+        </a>
+
+        <form action="@Url.Action("Transactions", "Profile")" class="transactions-search-form" method="get">
+            <input id="transactionSearch" name="search" type="search" placeholder="Search by Name, Product, or Status..." value="@Model.SearchTerm" />
+            <button type="submit" aria-label="Search transactions">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <div class="transactions-panel">
+        <div class="transactions-table-tab">
+            Transaction History
+        </div>
+
+        <div class="transactions-table-wrap">
+            <table class="transactions-table" id="transactionsTable">
+                <colgroup>
+                    <col class="transactions-col-user" />
+                    <col class="transactions-col-product" />
+                    <col class="transactions-col-date" />
+                    <col class="transactions-col-total" />
+                    <col class="transactions-col-status" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Product</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Transactions != null && Model.Transactions.Count > 0)
+                    {
+                        foreach (var record in Model.Transactions)
+                        {
+                            <tr data-search="@((record.UserName + " " + record.Product + " " + record.StatusLabel).ToLowerInvariant())">
+                                <td data-label="User"><span class="transaction-user">@record.UserName</span></td>
+                                <td data-label="Product"><span class="transaction-product">@record.Product</span></td>
+                                <td data-label="Date"><span class="transaction-date">@record.Date.ToString("MM/dd/yyyy")</span></td>
+                                <td data-label="Total"><span class="transaction-total">PHP @record.Total.ToString("0.00")</span></td>
+                                <td data-label="Status"><span class="transaction-status transaction-status-@record.Status">@record.StatusLabel</span></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="empty-row">
+                            <td colspan="5">No transactions matched your search.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <script>
+        (function () {
+            var searchInput = document.getElementById("transactionSearch");
+            var table = document.getElementById("transactionsTable");
+            if (!searchInput || !table) {
+                return;
+            }
+
+            searchInput.addEventListener("input", function () {
+                var term = searchInput.value.toLowerCase();
+                var rows = table.querySelectorAll("tbody tr[data-search]");
+
+                for (var index = 0; index < rows.length; index++) {
+                    var text = rows[index].getAttribute("data-search");
+                    rows[index].style.display = !term || text.indexOf(term) >= 0 ? "" : "none";
+                }
+            });
+        })();
+    </script>
+}

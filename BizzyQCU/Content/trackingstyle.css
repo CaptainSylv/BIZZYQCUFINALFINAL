@@ -1,0 +1,230 @@
+﻿/* Layout Reset */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden !important; /* 🔥 disables page scroll */
+}
+
+main, .container, .body-content {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Wrapper */
+.split-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh; /* FIXED */
+    overflow: hidden;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Sidebar */
+.sidebar-fixed {
+    width: 400px;
+    background: #ffffff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 50px;
+    flex-shrink: 0;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.03);
+    z-index: 10;
+}
+
+.sidebar-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+/* Emoji */
+.status-emoji-box {
+    width: 85px;
+    height: 85px;
+    background: #FFDE42;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    box-shadow: 0 8px 15px rgba(255, 222, 66, 0.3);
+}
+
+/* Text */
+.status-title {
+    font-size: 24px;
+    color: #111FA2;
+    font-weight: 800;
+    margin: 0;
+}
+
+.status-subtitle {
+    font-size: 15px;
+    color: #64748B;
+    font-weight: 600;
+}
+
+/* Progress */
+.custom-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #F1F5F9;
+    border-radius: 50px;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 45%;
+    height: 100%;
+    background: #5478FF;
+    border-radius: 50px;
+}
+
+/* Order number */
+.order-number {
+    color: #111FA2;
+    font-weight: 900;
+    font-size: 42px;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+.live-indicator {
+    color: #5478FF;
+    font-weight: 800;
+    letter-spacing: 2px;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Cancel button */
+.cancel-order-btn {
+    margin-top: 22px;
+    border: 0;
+    border-radius: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-weight: 800;
+    padding: 12px 18px;
+    cursor: pointer;
+}
+
+    .cancel-order-btn:hover {
+        background: #fecaca;
+    }
+
+    .cancel-order-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+/* RIGHT SIDE */
+.scrollable-area {
+    flex-grow: 1;
+    height: 100%;
+    overflow-y: auto;
+    background: linear-gradient(145deg, #FFDE42 0%, #111FA2 100%);
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+    .scrollable-area::-webkit-scrollbar {
+        width: 0;
+        display: none;
+    }
+
+/* Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 28px;
+    padding: 26px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+    .glass-card p,
+    .glass-card span {
+        font-size: 16px;
+    }
+
+/* Delivery row */
+.delivery-method-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.msg-courier {
+    margin-left: auto;
+}
+
+/* Button */
+.btn-primary {
+    background: #111FA2;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+
+.btn-back-link {
+    margin-top: 25px;
+    display: inline-block;
+    color: #111FA2;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 10px 20px;
+    border: 2px solid #111FA2;
+    border-radius: 12px;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+    .split-wrapper {
+        flex-direction: column;
+        height: auto;
+        overflow-y: visible;
+    }
+
+    .sidebar-fixed {
+        width: 100%;
+        padding: 30px 20px;
+        height: auto;
+        text-align: center;
+        align-items: center;
+    }
+
+    .sidebar-icon-container {
+        justify-content: center;
+    }
+
+    .scrollable-area {
+        padding: 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+}

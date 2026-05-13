@@ -1,0 +1,554 @@
+﻿/* Dashboard.css - Exclusive para sa Enterprise Dashboard */
+@font-face {
+    font-family: 'Proxima';
+    src: url('/Content/fonts/Proxima Nova Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Proxima';
+    src: url('/Content/fonts/Proxima Nova Semibold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --primary-yellow: #f4c430;
+    --deep-navy: #0f1a52;
+    --primary-blue: #3b82f6;
+    --primary-blue-dark: #2563eb;
+    --primary-blue-light: #60a5fa;
+    --light-gray: #f8f9fa;
+    --border-gray: #e5e7eb;
+    --text-muted: #6b7280;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Proxima', 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--deep-navy) 100%) no-repeat fixed;
+    color: var(--deep-navy);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
+    min-height: 100vh;
+}
+
+/* Dashboard Container */
+.screen-dashboard {
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.dashboard-panel {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* Enterprise Card - Left Side */
+.enterprise-card {
+    flex: 1.2;
+    min-width: 350px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+    .enterprise-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+/* Dashboard Grid - Right Side */
+.dashboard-grid {
+    flex: 2;
+    min-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Common Card Styles */
+.info-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+/* Panel Heading */
+.panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 28px 32px 20px 32px;
+}
+
+.panel-heading-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--deep-navy);
+    border-radius: 12px;
+}
+
+    .panel-heading-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: var(--primary-yellow);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+.panel-heading h1, .panel-heading h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--deep-navy);
+    margin: 0;
+}
+
+.stats-heading {
+    padding-bottom: 0;
+}
+
+/* Panel Divider */
+.panel-divider {
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-yellow), transparent);
+    margin: 0 32px 24px 32px;
+}
+
+.bottom-divider {
+    margin: 24px 32px 0 32px;
+}
+
+/* Enterprise Card Body */
+.enterprise-card-body {
+    padding: 8px 32px 32px 32px;
+}
+
+/* Avatar */
+.avatar-shell {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-yellow), var(--deep-navy));
+    padding: 4px;
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: white;
+}
+
+/* Details Grid */
+.details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 28px;
+}
+
+.details-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+    .details-row:last-child {
+        border-bottom: none;
+    }
+
+.details-grid dt {
+    width: 170px;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 15px;
+}
+
+.details-grid dd {
+    flex: 1;
+    font-weight: 500;
+    color: var(--deep-navy);
+    font-size: 16px;
+    margin: 0;
+    padding-left: 12px;
+    text-align: left;
+    word-break: break-word;
+}
+
+.compact .details-row {
+    padding: 14px 0;
+}
+
+/* Enterprise Side Tools */
+.enterprise-side-tools {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+/* QR Display */
+.qr-display-card {
+    flex: 1;
+    background: var(--light-gray);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    min-height: 170px;
+}
+
+.qr-display-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.qr-display-frame {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-gray);
+    overflow: hidden;
+}
+
+.qr-display-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.qr-display-placeholder {
+    font-size: 12px;
+    color: #999;
+}
+
+/* EDIT BUTTON - GAYA NG ENTERPRISE PROFILE BUTTON */
+.outline-action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--primary-yellow);
+    color: var(--deep-navy);
+    padding: 14px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+    .outline-action-button:hover {
+        background: #e0b020;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 196, 48, 0.3);
+    }
+
+.button-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+}
+
+    .button-icon svg {
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+.dashboard-edit-button {
+    background: var(--primary-yellow);
+    color: var(--deep-navy);
+    align-self: center;
+    min-width: 114px;
+    justify-content: center;
+}
+
+    .dashboard-edit-button:hover {
+        background: #e0b020;
+    }
+
+/* Section Title */
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 28px 32px 0 32px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.section-title-blue {
+    color: var(--deep-navy);
+}
+
+/* Stats Card */
+.stats-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-list {
+    padding: 8px 32px;
+}
+
+.stats-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+    .stats-row:last-child {
+        border-bottom: none;
+    }
+
+.stats-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef2ff;
+    border-radius: 12px;
+}
+
+    .stats-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: var(--deep-navy);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+.stats-icon-dark {
+    background: var(--deep-navy);
+}
+
+    .stats-icon-dark svg {
+        stroke: var(--primary-yellow);
+    }
+
+.stats-label {
+    flex: 1;
+    font-size: 15px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stats-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--deep-navy);
+    min-width: 70px;
+    text-align: right;
+}
+
+/* Sales Row */
+.sales-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 32px;
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, #fde68a 100%);
+    margin: 20px 0;
+}
+
+.sales-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--deep-navy);
+    margin-left: auto;
+    text-align: right;
+}
+
+.sales-row .stats-label {
+    color: var(--deep-navy);
+    font-size: 15px;
+}
+
+/* TRANSACTION BUTTON - GAYA NG ENTERPRISE PROFILE BUTTON */
+.stats-actions {
+    padding: 8px 32px 32px 32px;
+}
+
+.compact-button {
+    width: 100%;
+    justify-content: center;
+    background: var(--primary-yellow);
+    color: var(--deep-navy);
+    border: none;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+    .compact-button:hover {
+        background: #e0b020;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 196, 48, 0.3);
+    }
+
+/* LOGOUT BUTTON - GAYA NG ENTERPRISE PROFILE BUTTON */
+.logout-form {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.logout-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--primary-yellow);
+    color: var(--deep-navy);
+    border: none;
+    padding: 14px 32px;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Proxima', sans-serif;
+}
+
+    .logout-button:hover {
+        background: #e0b020;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 196, 48, 0.3);
+    }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-panel {
+        flex-direction: column;
+    }
+
+    .enterprise-card, .dashboard-grid {
+        min-width: auto;
+    }
+
+    .enterprise-side-tools {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .qr-display-card {
+        width: 100%;
+    }
+
+    .outline-action-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .screen-dashboard {
+        padding: 0 16px;
+        margin: 20px auto;
+    }
+
+    .panel-heading {
+        padding: 20px 24px 16px 24px;
+    }
+
+        .panel-heading h1, .panel-heading h2 {
+            font-size: 20px;
+        }
+
+    .panel-divider {
+        margin: 0 24px 20px 24px;
+    }
+
+    .enterprise-card-body {
+        padding: 8px 24px 24px 24px;
+    }
+
+    .details-row {
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px 0;
+    }
+
+    .details-grid dt {
+        width: auto;
+    }
+
+    .details-grid dd {
+        padding-left: 0;
+    }
+
+    .section-title {
+        padding: 24px 24px 0 24px;
+        font-size: 18px;
+    }
+
+    .stats-list {
+        padding: 8px 24px;
+    }
+
+    .stats-row {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px 0;
+    }
+
+    .sales-row {
+        flex-wrap: wrap;
+        padding: 20px 24px;
+        margin: 16px 0;
+    }
+
+    .sales-value {
+        margin-left: 0;
+    }
+
+    .stats-actions {
+        padding: 8px 24px 24px 24px;
+    }
+}

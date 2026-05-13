@@ -1,0 +1,151 @@
+﻿@font-face {
+    font-family: 'Proxima';
+    src: url('/Content/fonts/Proxima Nova Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Proxima';
+    src: url('/Content/fonts/Proxima Nova Semibold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --primary-yellow: #f4c430;
+    --deep-navy: #0f1a52;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Proxima', 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(to bottom, var(--primary-yellow), var(--deep-navy)) no-repeat fixed;
+    color: var(--deep-navy);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
+    min-height: 100vh;
+}
+
+.navbar {
+    position: sticky;
+    top: 0;
+    height: 90px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 40px;
+    background: #ffffff;
+    gap: 20px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: visible;
+    scrollbar-width: thin;
+}
+
+.logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 90px;
+}
+
+    .logo img {
+        max-height: 150px;
+        width: 200px;
+        display: block;
+    }
+
+.divider {
+    flex-shrink: 0;
+    width: 3px;
+    height: 40px;
+    background: #f4c430;
+    margin: 0 30px;
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 40px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+    .nav-links a {
+        text-decoration: none;
+        color: #111fa2;
+        font-weight: 600;
+        font-size: 16px;
+        white-space: nowrap;
+    }
+
+.right-icons {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.cart-icon {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+    .cart-icon img {
+        height: 35px;
+        width: auto;
+        transition: 0.2s;
+    }
+
+        .cart-icon img:hover {
+            transform: scale(1.05);
+        }
+
+.account-icon {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+    .account-icon img {
+        height: 40px;
+        width: auto;
+        border-radius: 50%;
+    }
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 20px;
+        gap: 15px;
+    }
+
+    .nav-links {
+        gap: 20px;
+    }
+
+    .divider {
+        margin: 0 15px;
+    }
+
+    .logo img {
+        width: 150px;
+    }
+
+    .right-icons {
+        gap: 10px;
+    }
+
+    .cart-icon img {
+        height: 28px;
+    }
+
+    .account-icon img {
+        height: 35px;
+    }
+}

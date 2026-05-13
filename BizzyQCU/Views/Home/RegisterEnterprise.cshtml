@@ -1,0 +1,211 @@
+﻿@{
+    ViewBag.Title = "Enterprise Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Content/Login.css" />
+<div class="auth-bg">
+    <div class="enterprise-card">
+        <h2>ENTERPRISE REGISTER</h2>
+        <div id="messageBox" class="message"></div>
+        <form id="registerForm" onsubmit="return registerEnterprise(event)">
+            <input type="text" id="enterpriseName" placeholder="Enterprise Name" required>
+            <select id="enterpriseType" required>
+                <option value="">-- Select Type --</option>
+                <option value="Food Business">Food Business</option>
+                <option value="Product Retail">Product Retail</option>
+                <option value="Service">Service</option>
+            </select>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email Address" required>
+
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Password" oninput="handlePasswordInput()" onkeyup="handlePasswordInput()" required>
+                <span class="show-password"
+                      id="togglePassword"
+                      onclick="togglePassword('password','togglePassword')"
+                      style="display:none;">
+                    Show
+                </span>
+            </div>
+
+            <div class="password-wrapper">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" oninput="handleConfirmPasswordInput()" onkeyup="handleConfirmPasswordInput()" required>
+                <span class="show-password"
+                      id="toggleConfirmPassword"
+                      onclick="togglePassword('confirmPassword','toggleConfirmPassword')"
+                      style="display:none;">
+                    Show
+                </span>
+            </div>
+
+            <input type="text" id="contact" placeholder="Contact Number"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   maxlength="11"
+                   title="Numbers only (0-9)" required>
+
+            <input type="text" id="gcashNumber" placeholder="GCash Number (Optional)"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   maxlength="11">
+
+            <div class="upload-wrapper">
+                <span class="upload-link" onclick="document.getElementById('documents').click()">📎 Upload Documents</span>
+                <span id="fileNames" class="file-name">No files chosen</span>
+                <input type="file" id="documents" name="documents" multiple style="display:none" onchange="updateFileNames()">
+            </div>
+            <button type="submit" class="auth-btn">REGISTER</button>
+        </form>
+        <div class="auth-links">
+            Already have an account? <a href="@Url.Action("Login", "Home")">Login</a><br>
+            Want to Buy? <a href="@Url.Action("RegisterStudent", "Home")">Sign Up Here</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function handlePasswordInput() {
+        var password = document.getElementById("password").value;
+        var toggle = document.getElementById("togglePassword");
+
+        if (password.length > 0) {
+            toggle.style.display = "block";
+        } else {
+            toggle.style.display = "none";
+        }
+    }
+
+    function handleConfirmPasswordInput() {
+        var password = document.getElementById("confirmPassword").value;
+        var toggle = document.getElementById("toggleConfirmPassword");
+
+        if (password.length > 0) {
+            toggle.style.display = "block";
+        } else {
+            toggle.style.display = "none";
+        }
+    }
+
+    function togglePassword(inputId, toggleId) {
+        var input = document.getElementById(inputId);
+        var toggle = document.getElementById(toggleId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            toggle.textContent = "Hide";
+        } else {
+            input.type = "password";
+            toggle.textContent = "Show";
+        }
+    }
+
+    function updateFileNames() {
+        var input = document.getElementById('documents');
+        var display = document.getElementById('fileNames');
+        if (input.files.length > 0) {
+            var names = [];
+            for (var i = 0; i < input.files.length; i++) names.push(input.files[i].name);
+            display.textContent = names.join(', ');
+        } else {
+            display.textContent = 'No files chosen';
+        }
+    }
+
+    function showMessage(msg, type) {
+        var box = document.getElementById('messageBox');
+        box.textContent = msg;
+        box.style.backgroundColor = type === 'error' ? '#fee' : '#e8f5e9';
+        box.style.color = type === 'error' ? '#c33' : '#2e7d32';
+        box.style.display = 'block';
+        setTimeout(function() { box.style.display = 'none'; }, 5000);
+    }
+
+    function validateContactNumber(contact) {
+        var pattern = /^[0-9]{11}$/;
+        return pattern.test(contact);
+    }
+
+    function registerEnterprise(e) {
+        e.preventDefault();
+
+        var password = document.getElementById('password').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            showMessage('Passwords do not match!', 'error');
+            return false;
+        }
+
+        var formData = {
+            StoreName: document.getElementById('enterpriseName').value,
+            EnterpriseType: document.getElementById('enterpriseType').value,
+            Username: document.getElementById('username').value,
+            Email: document.getElementById('email').value,
+            Password: password,
+            ContactNumber: document.getElementById('contact').value,
+            GcashNumber: document.getElementById('gcashNumber').value
+        };
+
+        if (!formData.StoreName || !formData.EnterpriseType || !formData.Username || !formData.Email || !formData.Password || !formData.ContactNumber) {
+            showMessage('Please fill in all required fields!', 'error');
+            return false;
+        }
+
+        if (!validateContactNumber(formData.ContactNumber)) {
+            showMessage('Contact Number must be 11 digits (e.g., 09123456789)', 'error');
+            return false;
+        }
+
+        if (formData.GcashNumber && formData.GcashNumber.trim() !== "") {
+            if (!validateContactNumber(formData.GcashNumber)) {
+                showMessage('GCash Number must be 11 digits (e.g., 09123456789)', 'error');
+                return false;
+            }
+        }
+
+        var fileInput = document.getElementById('documents');
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            showMessage('Please upload your documents!', 'error');
+            return false;
+        }
+
+        var payload = new FormData();
+        payload.append('StoreName', formData.StoreName);
+        payload.append('EnterpriseType', formData.EnterpriseType);
+        payload.append('Username', formData.Username);
+        payload.append('Email', formData.Email);
+        payload.append('Password', formData.Password);
+        payload.append('ContactNumber', formData.ContactNumber);
+        payload.append('GcashNumber', formData.GcashNumber);
+
+        var fileInput = document.getElementById('documents');
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            for (var i = 0; i < fileInput.files.length; i++) {
+                payload.append('documents', fileInput.files[i]);
+            }
+        }
+
+        $.ajax({
+            url: '@Url.Action("RegisterEnterprise", "Account")',
+            type: 'POST',
+            data: payload,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    showMessage(response.message, 'success');
+                    setTimeout(function() {
+                        window.location.href = '@Url.Action("Login", "Home")';
+                    }, 2000);
+                } else {
+                    showMessage(response.message, 'error');
+                }
+            },
+            error: function() {
+                showMessage('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        return false;
+    }
+</script>

@@ -1,0 +1,115 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Checkout - BizzyQCU";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/checkout.css">
+}
+
+@* Anti-forgery token read by Checkout.js for the PlaceOrder POST *@
+@Html.AntiForgeryToken()
+
+<div class="container main-container">
+    <div class="enterprise-warning mb-3">
+        <i class="fas fa-info-circle"></i> You can order from different enterprises in one checkout.
+        Items are grouped by enterprise and each enterprise will receive its own order.
+    </div>
+
+    <div class="checkout-card">
+        <h3 class="mb-4">📋 Products Ordered</h3>
+        <div id="enterpriseHeaderContainer" class="enterprise-banner" style="display: none;"></div>
+        <div class="table-responsive">
+            <table class="table table-cart">
+                <thead>
+                    <tr>
+                        <th style="width:70px"></th>
+                        <th></th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Item Subtotal</th>
+                        <th style="width:60px"></th>
+                    </tr>
+                </thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="checkout-card">
+        <h3 class="mb-4">🚚 Delivery & Payment</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="fw-bold">Delivery Option</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="deliveryOptionDisplay" class="me-2">Pickup</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary change-btn" data-type="delivery">CHANGE</button>
+                </div>
+                <div id="roomSpecifyContainer" class="mt-2" style="display:none;">
+                    <input type="text" id="roomSpecifyInput" class="form-control" placeholder="Specify room (e.g., IL602a, IK504)">
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="fw-bold">Payment Method</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="paymentMethodDisplay" class="me-2">Cash on Delivery</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary change-btn" data-type="payment">CHANGE</button>
+                </div>
+                <div class="mt-2">
+                    <button type="button" id="viewQrBtn" class="btn btn-sm btn-outline-success" style="display:none;">View QR</button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <label class="fw-bold">Note (optional)</label>
+            <textarea id="orderNote" class="form-control" rows="2" placeholder="Add special instructions, delivery notes, etc."></textarea>
+        </div>
+    </div>
+
+    <div class="checkout-card">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="fw-bold">Total Payment</span>
+                <span class="total-payment" id="totalPayment">&#8369;0.00</span>
+            </div>
+            <div>
+                <button class="btn btn-buy-more me-3" id="buyMoreBtn">
+                    <i class="fas fa-plus-circle"></i> Buy More
+                </button>
+                <button class="btn btn-place-order" id="placeOrderBtn">
+                    <i class="fas fa-check-circle"></i> Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="qrModal" class="qr-modal-overlay" style="display:none;">
+    <div class="qr-modal-card">
+        <button type="button" id="closeQrModalBtn" class="qr-modal-close" aria-label="Close">✕</button>
+        <h4>Enterprise GCash QR</h4>
+        <div id="qrModalContent" class="qr-modal-content"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="@Url.Content("~/Scripts/Checkout.js")?v=20260512-multi-enterprise"></script>
+    <script>
+        (function() {
+            // Check if TempData has reorder items from the controller
+            var reorderData = @Html.Raw(TempData["ReorderCart"] ?? "null");
+
+            if (reorderData) {
+                // Save the reorder items into sessionStorage
+                sessionStorage.setItem('bizzyCart', JSON.stringify(reorderData));
+            }
+
+            // Existing logic to sync DB cart if needed
+            var dbCart = @Html.Raw(ViewBag.CartJson ?? "[]");
+            if (dbCart && dbCart.length > 0 && !reorderData) {
+                sessionStorage.setItem('bizzyCart', JSON.stringify(dbCart));
+            }
+        })();
+    </script>
+    <script src="~/Scripts/Checkout.js"></script>
+}

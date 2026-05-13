@@ -1,0 +1,205 @@
+﻿@model IEnumerable<BizzyQCU.Models.EnterpriseListItem>
+@using System.Linq
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Enterprise List";
+    ViewBag.BodyClass = "product-page";
+    var enterprises = (Model ?? Enumerable.Empty<BizzyQCU.Models.EnterpriseListItem>()).ToList();
+    var isLoggedIn = Session["UserId"] != null;
+}
+
+<div class="product-page-container">
+    <div class="floating-header">
+        <h2>CAMPUS <span class="header-highlight">MARKETPLACE</span></h2>
+        <p>Shop from student enterprises - food, merch, printing, &amp; more.</p>
+    </div>
+
+    <div class="search-filtering">
+        <div class="search-row">
+            <div class="searchbox-section">
+                @Html.TextBox("searchString", null, new
+                {
+                    @class = "search-input",
+                    placeholder = "Search for enterprises",
+                    id = "productSearch",
+                    autocomplete = "off"
+                })
+            </div>
+            <button class="filter-icon-btn" id="filterToggleBtn" aria-label="Toggle filters">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                    <line x1="4" y1="6" x2="20" y2="6" />
+                    <circle cx="14" cy="6" r="2.5" fill="white" />
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                    <circle cx="8" cy="12" r="2.5" fill="white" />
+                    <line x1="4" y1="18" x2="20" y2="18" />
+                    <circle cx="16" cy="18" r="2.5" fill="white" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="filter-section" id="filterSection">
+            @Html.DropDownList("category", new List<SelectListItem>
+            {
+                new SelectListItem { Text = "All Categories", Value = "" },
+                new SelectListItem { Text = "Food",           Value = "food" },
+                new SelectListItem { Text = "Merchandise",    Value = "merch" },
+                new SelectListItem { Text = "Printing",       Value = "printing" },
+                new SelectListItem { Text = "Services",       Value = "services" }
+            }, new { @class = "filter-dropdown", id = "categoryFilter" })
+
+            @Html.DropDownList("popularity", new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Sort by: Recommended", Value = "" },
+                new SelectListItem { Text = "Most Popular",          Value = "high" },
+                new SelectListItem { Text = "Least Popular",         Value = "low" }
+            }, new { @class = "filter-dropdown", id = "popularityFilter" })
+        </div>
+    </div>
+
+    <div class="product-list-wrapper">
+        <div class="product-grid-container" id="productGrid">
+
+            @if (!enterprises.Any())
+            {
+                <div class="market-empty-state">No current enterprises</div>
+            }
+
+            @foreach (var ent in enterprises)
+            {
+                string viewUrl = Url.Action("ViewEnterprise", "Enterprise", new { id = ent.EnterpriseId });
+
+                string categoryLower = (ent.EnterpriseType != null) ? ent.EnterpriseType.ToLower() : "";
+                string cat;
+                if (categoryLower.IndexOf("food") != -1 || categoryLower.IndexOf("beverage") != -1)
+                {
+                    cat = "food";
+                }
+                else if (categoryLower.IndexOf("merch") != -1 || categoryLower.IndexOf("retail") != -1)
+                {
+                    cat = "merch";
+                }
+                else if (categoryLower.IndexOf("print") != -1)
+                {
+                    cat = "printing";
+                }
+                else if (categoryLower.IndexOf("service") != -1)
+                {
+                    cat = "services";
+                }
+                else
+                {
+                    cat = "other";
+                }
+
+                string popularity = ent.ProductCount >= 5 ? "high" : "low";
+
+                string statusLabel;
+                string statusClass;
+                if (ent.Status == "approved")
+                {
+                    statusLabel = "Online";
+                    statusClass = "status-online";
+                }
+                else if (ent.Status == "suspended")
+                {
+                    statusLabel = "Suspended";
+                    statusClass = "status-suspended";
+                }
+                else
+                {
+                    statusLabel = "Pending";
+                    statusClass = "status-pending";
+                }
+
+                // Logo is a varchar path in DB
+                string logoSrc = !string.IsNullOrEmpty(ent.StoreLogo)
+                    ? Url.Content(ent.StoreLogo)
+                    : Url.Content("~/Content/Images/test-img-profile.jpg");
+
+                <div class="product-card"
+                     data-category="@cat"
+                     data-popularity="@popularity"
+                     data-name="@ent.StoreName.ToLower()"
+                     onclick="handleViewEnterpriseClick('@viewUrl')"
+                     style="cursor:pointer;">
+
+                    <div class="product-img-placeholder">
+                        <img src="@logoSrc" alt="@ent.StoreName" />
+                    </div>
+
+                    <div class="product-card-info">
+                        <span class="product-store">@ent.StoreName</span>
+                        <span class="@statusClass" style="font-size:0.78rem; font-weight:700; margin-bottom:4px;">@statusLabel</span>
+                        <div class="product-footer" style="display:flex; justify-content:center; width:100%;">
+                            <button class="enterprise-btn"
+                                    onclick="event.stopPropagation(); handleViewEnterpriseClick('@viewUrl')">
+                                View Enterprise
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <div class="pagination-container" id="paginationContainer">
+                <button class="pagination-btn" id="prevPageBtn">◀ Previous</button>
+                <span class="page-info" id="pageInfo">Page 1</span>
+                <button class="pagination-btn" id="nextPageBtn">Next Page ▶</button>
+            </div>
+        </div>
+
+
+        @if (enterprises.Any())
+        {
+            <p class="no-results" id="noResults" style="display:none;">No enterprises found.</p>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/ProductPageLogic.js")?v=20260513-prev-next"></script>
+    <script>
+        function showEnterpriseLoginAlert() {
+            var existingOverlay = document.getElementById('customMessageOverlay');
+            if (existingOverlay) { existingOverlay.remove(); }
+
+            var overlay = document.createElement('div');
+            overlay.id = 'customMessageOverlay';
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+
+            var msgBox = document.createElement('div');
+            msgBox.style.cssText = 'background:#fff5f5;color:#c62828;padding:24px 32px;border-radius:16px;font-weight:600;font-size:1.1rem;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 40px rgba(0,0,0,0.2);border:2px solid #c62828;font-family:DM Sans,sans-serif;';
+
+            var icon = document.createElement('div');
+            icon.style.cssText = 'font-size:2.5rem;margin-bottom:12px;';
+            icon.innerHTML = '⚠️';
+            msgBox.appendChild(icon);
+
+            var text = document.createElement('div');
+            text.textContent = 'Please login first to view enterprise details.';
+            msgBox.appendChild(text);
+
+            var okBtn = document.createElement('button');
+            okBtn.textContent = 'OK';
+            okBtn.style.cssText = 'margin-top:20px;padding:8px 28px;background:#c62828;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;font-size:0.9rem;';
+            okBtn.onclick = function () { overlay.remove(); };
+
+            msgBox.appendChild(okBtn);
+            overlay.appendChild(msgBox);
+            document.body.appendChild(overlay);
+        }
+
+        function handleViewEnterpriseClick(url) {
+            var isLoggedIn = @Html.Raw(isLoggedIn ? "true" : "false");
+            if (!isLoggedIn) {
+                showEnterpriseLoginAlert();
+                return;
+            }
+            window.location.href = url;
+        }
+    </script>
+}
